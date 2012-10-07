@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import re
 from xml.dom.minidom import Document
 import datetime
