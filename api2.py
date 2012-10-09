@@ -1,11 +1,12 @@
 # -*- coding: UTF-8 -*-
-from urllib.request import urlopen, OpenerDirector
+from urllib.request import urlopen, build_opener
 from urllib.parse import urljoin, urlparse, urlunparse, urlencode
 import re
+import json
 
 class Entity(object):
-	default_api_base = 'http://openmensa.org/api/v2'
-	default_opener = OpenerDirector()
+	default_api_base = 'http://openmensa.org/api/v2/'
+	default_opener = build_opener()
 	charset_pattern = re.compile('.*charset=(?P<encoding>[\w-]+)')
 
 	def __init__(self, api_base=None, opener=None):
@@ -15,7 +16,7 @@ class Entity(object):
 	def request(self, name, params={}):
 		# build url with api_base, name + params
 		response = self.opener.open(urlunparse(
-			list(urlparse(urljoin(self.base_api, name))[0:4]) +
+			list(urlparse(urljoin(self.api_base, name))[0:4]) +
 			[ urlencode(params), None ]
 		))
 		# read content, decode to string if possible
@@ -34,9 +35,9 @@ class Entity(object):
 
 
 class Canteen(Entity):
-	def __init__(id):
-		canteen = self.request('canteens/{id}'.format(int(id)))
-		pass
+	def __init__(self, id):
+		super(Canteen, self).__init__()
+		canteen = self.request('canteens/{id}'.format(id=int(id)))
 
 
 class Meal(Entity):
