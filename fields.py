@@ -1,27 +1,4 @@
 # -*- coding: utf-8 -*-
-
-
-class ModelMeta(type):
-	def __new__(cls, name, bases, attrs):
-		doctype = attrs.setdefault('_type', name)
-		fields = {}
-		for base in bases:
-			baseFields = getattr(base, '_fields', {})
-			for field in baseFields:
-				fields[field] = copy.copy(baseFields[field])
-		for elementname in list(attrs.keys()):
-			element = attrs[elementname]
-			if issubclass(type(element), Field):
-				fields[elementname] = attrs.pop(elementname)
-		attrs['_fields'] = fields
-		finishedModel = type.__new__(cls, name, bases, attrs)
-		for fieldname in fields:
-			field = fields[fieldname]
-			field._model = finishedModel
-			field.init(fieldname)
-		return finishedModel
-
-
 class Field(object):
 	convertFunc = lambda v: v
 
