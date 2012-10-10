@@ -23,18 +23,19 @@ class Canteen(Api2Entity):
 			self.fromJsonDict(values)
 
 	@staticmethod
-	def find(ids=None, near=None):
+	def find(limit=None, ids=None, near=None):
 		recvCanteens = lambda **kwargs: list(map(lambda c: Canteen(values=c),
 			Canteen().request('canteens', params=kwargs)))
+		params = {}
+		if limit:
+			params['limit'] = limit
 		if ids:
-			ids = ','.join(map(lambda i: str(i), ids))
-			return recvCanteens(ids=ids)
+			params['ids'] = ','.join(map(lambda i: str(i), ids))
 		if near is not None:
-			params = { 'near[lat]': near[0], 'near[lng]': near[1] }
+			params.update({ 'near[lat]': near[0], 'near[lng]': near[1] })
 			if len(near) > 2:
 				params['near[dist]'] = near[2]
-			return recvCanteens(**params)
-		raise NotImplemented
+		return recvCanteens(**params)
 
 	def __str__(self):
 		return 'Canteen({id}: {name})'.format(**self.__dict__)
