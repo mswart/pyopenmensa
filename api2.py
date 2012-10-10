@@ -4,7 +4,10 @@ from urllib.parse import urljoin, urlparse, urlunparse, urlencode
 import re
 import json
 
-class Entity(object):
+from fields import *
+
+
+class Entity(object, metaclass=ModelMeta):
 	default_api_base = 'http://openmensa.org/api/v2/'
 	default_opener = build_opener()
 	charset_pattern = re.compile('.*charset=(?P<encoding>[\w-]+)')
@@ -12,6 +15,10 @@ class Entity(object):
 	def __init__(self, api_base=None, opener=None):
 		self.api_base = api_base or self.default_api_base
 		self.opener = opener or self.default_opener
+
+	def fromJsonDict(self, jsonDict):
+		for name in self._fields:
+			setattr(self, name, self._fields[name].fromJsonDict(jsonDict))
 
 	def request(self, name, params={}):
 		# build url with api_base, name + params
@@ -35,9 +42,17 @@ class Entity(object):
 
 
 class Canteen(Entity):
-	def __init__(self, id):
+	name = StringField()
+	address = StringField()
+	latitude = FloatField()
+	longitude = FloatField()
+
+	def __init__(self, id=None):
 		super(Canteen, self).__init__()
-		canteen = self.request('canteens/{id}'.format(id=int(id)))
+		if id:
+			self.fromJsonDict(self.request('canteens/{id}'.format(id=int(id))))
+		else:
+			self.fromJsonDict({})
 
 
 class Meal(Entity):
