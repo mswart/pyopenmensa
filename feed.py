@@ -2,6 +2,10 @@
 import re
 from xml.dom.minidom import Document
 import datetime
+try:
+	from collections import OrderedDict
+except ImportError: # support python 2.6
+	OrderedDict = dict
 
 date_format = re.compile(".*?(?P<datestr>(" +
 				"\d{2}(\d{2})?-\d{2}-\d{2}|" +
@@ -123,7 +127,7 @@ class OpenMensaCanteen():
 			date = extractDate(date)
 		# ensure we have an entry for this date
 		if date not in self._days:
-			self._days[date] = {}
+			self._days[date] = OrderedDict()
 		# ensure we have a category element for this category
 		if category not in self._days[date]:
 			self._days[date][category] = []
