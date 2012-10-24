@@ -152,6 +152,11 @@ class OpenMensaCanteen():
 	def dayCount(self):
 		return len(self._days)
 
+	def hasMealsFor(self, date):
+		if date not in self._days or self._days[date] is False:
+			return False
+		return len(self._days[date]) > 0
+
 	def toXMLFeed(self):
 		""" Convert this cateen information into string
 			which is a valid OpenMensa v2 xml feed"""
