@@ -7,35 +7,49 @@ try:
 except ImportError: # support python 2.6
 	OrderedDict = dict
 
+
+
+# Helpers to extract dates from strings
+# -------------------------------------
+
 date_format = re.compile(".*?(?P<datestr>(" +
-				"\d{2}(\d{2})?-\d{2}-\d{2}|" +
-				"\d{2}\.\d{2}\.\d{2}(\d{2})?|" +
-				"(?P<day>\d{2})\. ?(?P<month>\w+) ?(?P<year>\d{2}(\d{2})?))).*")
+				"\d{2}(\d{2})?-[01]?\d-[0-3]?\d|" +
+				"[0-3]?\d\.[01]?\d\.\d{2}(\d{2})?|" +
+				"(?P<day>[0-3]?\d)\.? ?(?P<month>\w+) ?(?P<year>\d{2}(\d{2})?))).*")
 month_names = {
-	'Januar': '01',
-	'Februar': '02',
-	'März': '03',
-	'April': '04',
-	'Mai': '05',
-	'Juni': '06',
-	'Juli': '07',
-	'August': '08',
-	'September': '09',
-	'Oktober': '10',
-	'November': '11',
-	'Dezember': '12'
+	'januar': '01',
+	'january': '01',
+	'februar': '02',
+	'february': '02',
+	'märz': '03',
+	'maerz': '03',
+	'march': '03',
+	'april': '04',
+	'mai': '05',
+	'may': '05',
+	'juni': '06',
+	'june': '06',
+	'juli': '07',
+	'july': '07',
+	'august': '08',
+	'september': '09',
+	'oktober': '10',
+	'october': '10',
+	'november': '11',
+	'dezember': '12',
+	'december': '12',
 }
 
 def extractDate(text):
 	if type(text) is datetime.date:
 		return text
-	match = date_format.search(text)
+	match = date_format.search(text.lower())
 	if not match:
-		raise ValueError('unsupported date format: DD.MM.YYYY, DD.MM.YY, YYYY-MM-DD, YY-MM-DD, DD. Month YYYY or DD. Month YY needed')
+		raise ValueError('unsupported date format: {}'.format(text.lower()))
 	# convert DD.MM.YYYY into YYYY-MM-DD
 	if match.group('month'):
 		if not match.group('month') in month_names:
-			raise ValueError('unknown month names')
+			raise ValueError('unknown month names: "{}"'.format(match.group('month')))
 		year = int(match.group('year'))
 		return datetime.date(
 			year if year > 2000 else 2000 + year,
@@ -70,6 +84,11 @@ class extractWeekDates():
 	def __iter__(self):
 		for i in range(7):
 			yield self.monday + datetime.date.resolution * i
+
+
+
+# Data and helper class for canteen data
+# --------------------------------------
 
 
 class OpenMensaCanteen():

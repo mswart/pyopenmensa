@@ -1,15 +1,18 @@
 # -*- coding: UTF-8 -*-
 from datetime import date
+import pytest
 
 from pyopenmensa.feed import extractDate
 
 
 
 class TestExtractDateFormats():
+
 	date = date(2013, 3, 7)
+
+
 	def test_passing_of_date_objects(self):
-		day = date.today()
-		assert day is extractDate(day)
+		assert extractDate(self.date) is self.date
 
 
 	def test_dd_mm_yyyy(self):
@@ -110,3 +113,13 @@ class TestExtractDateFormats():
 		assert extractDate('07 Maerz 13') == self.date
 		assert extractDate('07März 13') == self.date
 		assert extractDate('07Maerz 13') == self.date
+
+
+	def test_unknown_month(self):
+		with pytest.raises(ValueError):
+			extractDate('07. Hans 2013')
+
+
+	def test_unknown_date_format(self):
+		with pytest.raises(ValueError):
+			extractDate('2050.11-24')
