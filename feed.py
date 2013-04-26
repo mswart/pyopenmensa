@@ -15,7 +15,8 @@ except ImportError: # support python 2.6
 date_format = re.compile(".*?(?P<datestr>(" +
 				"\d{2}(\d{2})?-[01]?\d-[0-3]?\d|" +
 				"[0-3]?\d\.[01]?\d\.\d{2}(\d{2})?|" +
-				"(?P<day>[0-3]?\d)\.? ?(?P<month>\w+) ?(?P<year>\d{2}(\d{2})?))).*")
+				"(?P<day>[0-3]?\d)\.? ?(?P<month>\S+) ?(?P<year>\d{2}(\d{2})?))).*",
+				re.UNICODE)
 month_names = {
 	'januar': '01',
 	'january': '01',
@@ -111,7 +112,7 @@ class OpenMensaCanteen():
 			self.legendData = text
 			return
 		self.legendData = {}
-		for match in re.finditer(legend_regex, text):
+		for match in re.finditer(legend_regex, text, re.UNICODE):
 			self.legendData[match.group('name')] = match.group('value').strip()
 
 	def setAdditionalCharges(self, defaultPriceRole, additionalCharges):
@@ -183,7 +184,7 @@ class OpenMensaCanteen():
 		feed.appendChild(self.toTag(document))
 		return '<?xml version="1.0" encoding="UTF-8"?>\n' + feed.toprettyxml(indent='  ')
 
-	default_extra_regex = re.compile('\((?P<extra>[0-9a-zA-Z]{1,2}(?:,[0-9a-zA-Z]{1,2})*)\)')
+	default_extra_regex = re.compile('\((?P<extra>[0-9a-zA-Z]{1,2}(?:,[0-9a-zA-Z]{1,2})*)\)', re.UNICODE)
 	def extractNotes(self, name, notes):
 		if self.legendData is None:
 			raise ValueError('setLegendData call needed!')
@@ -197,7 +198,7 @@ class OpenMensaCanteen():
 		name = self.default_extra_regex.sub('', name).replace('\xa0',' ').replace('  ', ' ').strip()
 		return name, list(set(notes))
 
-	price_regex = re.compile('(?P<price>\d+[,.]\d{2}) ?€?')
+	price_regex = re.compile('(?P<price>\d+[,.]\d{2}) ?€?', re.UNICODE)
 	def buildPrices(self, data, roles):
 		prices = {}
 		if roles:
