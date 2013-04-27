@@ -1,5 +1,7 @@
 # PyOpenMensa - use OpenMensa with Python
 
+[![Build Status](https://travis-ci.org/mswart/pyopenmensa.png?branch=master)](https://travis-ci.org/mswart/pyopenmensa)
+
 This small python library helps you to work with [OpenMensa][om] by:
 
 * **support writing canteen feeds**: [The feed module](#generating-openmensa-feeds) makes it very easy to generate a valid [OpenMensa Feed V2][feed_v2]
