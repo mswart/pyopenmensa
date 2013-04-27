@@ -88,6 +88,45 @@ class extractWeekDates():
 
 
 
+# Helpers for price handling
+# -------------------------------------
+default_price_regex = re.compile('(?P<price>\d+[,.]\d{2}) ?(€)?', re.UNICODE)
+
+def convertPrice(variant, regex=default_price_regex):
+	if type(variant) is int:
+		return variant
+	elif type(variant) is float:
+		return round(variant * 100)
+	elif type(variant) is str:
+		match = regex.search(variant)
+		if not match:
+			raise ValueError('Could not extract price: {}'.format(variant))
+		return int(match.group('price').replace(',', '').replace('.', ''))
+	else:
+		raise TypeError('Unknown price type: {!r}'.format(variant))
+
+def buildPrices(data, roles=None, regex=default_price_regex, default=None, additional={}):
+	if type(data) is dict:
+		return dict(map(lambda item: (item[0], convertPrice(item[1])), data.items()))
+	elif type(data) in [ str, float, int]:
+		if default is None:
+			raise ValueError('You have to call setAdditionalCharges before it is possible to pass a string as price')
+		price = convertPrice(data)
+		prices = { default: price }
+		for role in additional:
+			prices[role] = price + convertPrice(additional[role])
+		return prices
+	elif roles:
+		prices = {}
+		priceRoles = iter(roles)
+		for price in data:
+			prices[next(priceRoles)] = convertPrice(price)
+		return prices
+	else:
+		raise TypeError('This type is for prices not supported!')
+
+
+
 # Data and helper class for canteen data
 # --------------------------------------
 
@@ -104,7 +143,7 @@ class OpenMensaCanteen():
 			structures"""
 		self._days = {}
 		self.legendData = None
-		self.additionalCharges = None
+		self.additionalCharges = (None, {})
 
 	default_legend_regex = '(?P<name>\d+)\)\s*(?P<value>\w+((\s+\w+)*[^0-9)]))'
 	def setLegendData(self, text, legend_regex = default_legend_regex):
@@ -115,18 +154,15 @@ class OpenMensaCanteen():
 		for match in re.finditer(legend_regex, text, re.UNICODE):
 			self.legendData[match.group('name')] = match.group('value').strip()
 
-	def setAdditionalCharges(self, defaultPriceRole, additionalCharges):
+	def setAdditionalCharges(self, default, additional):
 		""" This is a helper function, which fast up the calculation
 			of prices. It is useable if the canteen has fixed
 			additional charges for special roles.
-			defaultPriceRole specifies for which price role the price
+			default specifies for which price role the price
 			of addMeal are.
-			additionalCharges is a dictonary which defines the extra
+			additional is a dictonary which defines the extra
 			costs (value) for other roles (key)."""
-		for role in additionalCharges:
-			if type(additionalCharges[role]) is not float:
-				additionalCharges[role] = float(additionalCharges[role].replace(',', '.'))
-		self.additionalCharges = (defaultPriceRole, additionalCharges)
+		self.additionalCharges = (default, buildPrices(additional))
 
 	def addMeal(self, date, category, name, notes = [],
 			prices = {}, priceRoles = None):
@@ -155,7 +191,9 @@ class OpenMensaCanteen():
 		if self.legendData:
 			name, notes = self.extractNotes(name, notes)
 		# convert prices if needed:
-		prices = self.buildPrices(prices, priceRoles)
+		prices = buildPrices(prices, priceRoles,
+			default=self.additionalCharges[0],
+			additional=self.additionalCharges[1])
 		# add meal into category:
 		self._days[date][category].append((name, notes, prices))
 
@@ -197,31 +235,6 @@ class OpenMensaCanteen():
 		# from notes from name
 		name = self.default_extra_regex.sub('', name).replace('\xa0',' ').replace('  ', ' ').strip()
 		return name, list(set(notes))
-
-	price_regex = re.compile('(?P<price>\d+[,.]\d{2}) ?€?', re.UNICODE)
-	def buildPrices(self, data, roles):
-		prices = {}
-		if roles:
-			priceRoles = iter(roles())
-			for price in data:
-				prices[next(priceRoles)] = price
-		elif type(data) is str:
-			if self.additionalCharges is None:
-				raise ValueError('You have to call setAdditionalCharges before it is possible to pass a string as price')
-			match = self.price_regex.search(data)
-			if not match:
-				raise ValueError('Could not extract price from given string: "{}"'.format(data))
-			price = float(match.group('price').replace(',', '.'))
-			prices = {
-				self.additionalCharges[0]: '{:.2f}'.format(price),
-			}
-			for role in self.additionalCharges[1]:
-				prices[role] = '{:.2f}'.format(price + self.additionalCharges[1][role])
-		elif type(data) is dict:
-			prices = data
-		else:
-			raise TypeError('This type is for prices not supported!')
-		return prices
 
 	@staticmethod
 	def createDocument():

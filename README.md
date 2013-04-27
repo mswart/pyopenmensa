@@ -105,26 +105,27 @@ Internally pyopenmensa counts in cents (integers). But strings and floats can be
 - "3,09 €"
 - "3.09€"
 - "3,09€"
+- "3.09"
+- "3,09"
 
 Also these ways:
 
 - a dictionary with a role to prices mapping
 
   ```python
-  canteen.buildPrices({'student': '3.64 €', 'employee': 3.84, 'others': 414})
+  buildPrices({'student': '3.64 €', 'employee': 3.84, 'others': 414})
   ```
 
 - a iterator about prices and a iterator about roles.
 
   ```python
-  canteen.buildPrices(['3.64€', 3.84, 414], ('student', 'employee', 'role'))
+  buildPrices(['3.64€', 3.84, 414], ('student', 'employee', 'role'))
   ```
 
 - base prices and additional costs for other roles:
 
   ```python
-  canteen.setAdditionalCosts('student', { 'employee': '0.20€', 'others': 50)
-  canteen.buildPrices(3.64)
+  buildPrices(3.64, default='student', addtional={'employee': '0.20€', 'others': 50})
   ```
 
 will create:
