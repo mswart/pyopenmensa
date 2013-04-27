@@ -127,6 +127,33 @@ def buildPrices(data, roles=None, regex=default_price_regex, default=None, addit
 
 
 
+# Helpers for notes and legend handling
+# -------------------------------------
+
+default_legend_regex = '(?P<name>(\d|[a-z])+)\)\s*(?P<value>\w+((\s+\w+)*[^0-9)]))'
+def buildLegend(legend={}, text=None, regex=default_legend_regex):
+	if text is not None:
+		for match in re.finditer(regex, text, re.UNICODE):
+			legend[match.group('name')] = match.group('value').strip()
+	return legend
+
+default_extra_regex = re.compile('\((?P<extra>[0-9a-zA-Z]{1,2}(?:,[0-9a-zA-Z]{1,2})*)\)', re.UNICODE)
+def extractNotes(name, notes, legend=None, regex=default_extra_regex):
+	if legend is None:
+		return name, notes
+	# extract note
+	for note in list(','.join(regex.findall(name)).split(',')):
+		if note and note in legend:
+			if legend[note] not in notes:
+				notes.append(legend[note])
+		elif note: # skip empty notes
+			print('could not find extra note "{}"'.format(note))
+	# from notes from name
+	name = regex.sub('', name).replace('\xa0',' ').replace('  ', ' ').strip()
+	return name, notes
+
+
+
 # Data and helper class for canteen data
 # --------------------------------------
 
@@ -145,14 +172,8 @@ class OpenMensaCanteen():
 		self.legendData = None
 		self.additionalCharges = (None, {})
 
-	default_legend_regex = '(?P<name>\d+)\)\s*(?P<value>\w+((\s+\w+)*[^0-9)]))'
-	def setLegendData(self, text, legend_regex = default_legend_regex):
-		if type(text) is dict:
-			self.legendData = text
-			return
-		self.legendData = {}
-		for match in re.finditer(legend_regex, text, re.UNICODE):
-			self.legendData[match.group('name')] = match.group('value').strip()
+	def setLegendData(self, *args, **kwargs):
+		self.legendData = buildLegend(*args, **kwargs)
 
 	def setAdditionalCharges(self, default, additional):
 		""" This is a helper function, which fast up the calculation
@@ -189,7 +210,7 @@ class OpenMensaCanteen():
 			self._days[date][category] = []
 		# handle notes:
 		if self.legendData:
-			name, notes = self.extractNotes(name, notes)
+			name, notes = self.extractNotes(name, notes, legend=self.legendData)
 		# convert prices if needed:
 		prices = buildPrices(prices, priceRoles,
 			default=self.additionalCharges[0],
@@ -221,20 +242,6 @@ class OpenMensaCanteen():
 		feed, document = self.createDocument()
 		feed.appendChild(self.toTag(document))
 		return '<?xml version="1.0" encoding="UTF-8"?>\n' + feed.toprettyxml(indent='  ')
-
-	default_extra_regex = re.compile('\((?P<extra>[0-9a-zA-Z]{1,2}(?:,[0-9a-zA-Z]{1,2})*)\)', re.UNICODE)
-	def extractNotes(self, name, notes):
-		if self.legendData is None:
-			raise ValueError('setLegendData call needed!')
-		# extract note
-		for note in set(','.join(self.default_extra_regex.findall(name)).split(',')):
-			if note and note in self.legendData:
-				notes.append(self.legendData[note])
-			elif note: # skip empty notes
-				print('could not find extra note "{}"'.format(note))
-		# from notes from name
-		name = self.default_extra_regex.sub('', name).replace('\xa0',' ').replace('  ', ' ').strip()
-		return name, list(set(notes))
 
 	@staticmethod
 	def createDocument():
