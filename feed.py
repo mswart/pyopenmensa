@@ -46,11 +46,11 @@ def extractDate(text):
 		return text
 	match = date_format.search(text.lower())
 	if not match:
-		raise ValueError('unsupported date format: {}'.format(text.lower()))
+		raise ValueError('unsupported date format: {0}'.format(text.lower()))
 	# convert DD.MM.YYYY into YYYY-MM-DD
 	if match.group('month'):
 		if not match.group('month') in month_names:
-			raise ValueError('unknown month names: "{}"'.format(match.group('month')))
+			raise ValueError('unknown month names: "{0}"'.format(match.group('month')))
 		year = int(match.group('year'))
 		return datetime.date(
 			year if year > 2000 else 2000 + year,
@@ -100,10 +100,10 @@ def convertPrice(variant, regex=default_price_regex):
 	elif type(variant) is str:
 		match = regex.search(variant)
 		if not match:
-			raise ValueError('Could not extract price: {}'.format(variant))
+			raise ValueError('Could not extract price: {0}'.format(variant))
 		return int(match.group('price').replace(',', '').replace('.', ''))
 	else:
-		raise TypeError('Unknown price type: {!r}'.format(variant))
+		raise TypeError('Unknown price type: {0!r}'.format(variant))
 
 def buildPrices(data, roles=None, regex=default_price_regex, default=None, additional={}):
 	if type(data) is dict:
@@ -147,7 +147,7 @@ def extractNotes(name, notes, legend=None, regex=default_extra_regex):
 			if legend[note] not in notes:
 				notes.append(legend[note])
 		elif note: # skip empty notes
-			print('could not find extra note "{}"'.format(note))
+			print('could not find extra note "{0}"'.format(note))
 	# from notes from name
 	name = regex.sub('', name).replace('\xa0',' ').replace('  ', ' ').strip()
 	return name, notes
