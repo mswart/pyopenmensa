@@ -301,8 +301,8 @@ class BasicCanteen():
             price = output.createElement('price')
             price.setAttribute('role', role)
             price.appendChild(output.createTextNode("{euros}.{cents:0>2}"
-                              .format(euros=prices[role] / 100,
-                                      cents=prices[role])))
+                              .format(euros=prices[role] // 100,
+                                      cents=prices[role] % 100)))
             meal.appendChild(price)
         return meal
 
