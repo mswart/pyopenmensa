@@ -1,9 +1,18 @@
 Install PyOpenMensa
 ===================
 
-Currently only installation via git__ is supported, but building packages is planed (help is welcome).
+Currently only installation via git__ is supported, but building packages is planned (help is welcome).
 
 __ http://git-scm.com/
+
+
+Requirements
+------------
+
+* **Python >= 3.2**, Python 2.6 and Python 2.7 are currently also supported, but Python 3 is recommended.
+
+No additional packages or libraries are needed.
+
 
 Via git
 -------

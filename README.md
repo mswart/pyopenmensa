@@ -10,80 +10,86 @@ This small python library helps you to work with [OpenMensa][om] by:
 More information about [OpenMensa and all possibilities for developers][om-doc].
 
 
+## Documentation
 
-## Requirements
+**See http://pyom.devtation.de/ for the [Full documentation about PyOpenMensa][pyom-doc]**
 
-* **Python >= 3.2**, Python 2.7 looks like it works, but the library is currently only tested with Python 3.2
+The documentation is created with [Spinx][sphinx] and the documentation source code can be found in the doc/ directory.
 
-No additional packages or libraries are needed.
+## tldr: Documentation
 
+1.   You need [Python][python] 2.6, 2.7 or **>=3.2**.
+2.   Install pyopenmensa via git:
 
+     ```bash
+     git clone git://github.com/mswart/pyopenmensa
+     ```
 
-## Generating OpenMensa Feeds
+3.   Create Feed builder:
 
+     ```python
+     # import LazyCanteen - the container for all meals
+     from pyopenmensa.feed import LazyCanteen
+     canteen = LazyCanteen() # canteen container
+     ```
 
-### Principle usage
+4.   Add feed data (PyOpenMensa can do basic parsing and converting):
 
-The way to generate a feed is very easy:
+     ```python
+     from datetime import date
+     canteen.addMeal(date(2013, 3, 4), 'Hauptgericht', 'Gulasch',
+         notes=['Mit Süßstoff', 'Schwein'],
+         prices={'student': 203, 'other': '3,05 €'}
+     )
+     canteen.setDayClosed('5.3.2013')
+     ```
 
-1. Create a canteen object
-2. Add meal informations to canteen
-3. Receive built XML
+5.   Receive XML Feed:
 
-This little example:
+     ```python
+     print(canteen.toXMLFeed())
+     ```
 
-```python
-# import OpenMensaCanteen - the container for all meals
-from pyopenmensa.feed import OpenMensaCanteen
-canteen = OpenMensaCanteen() # canteen container
-# add meals
-canteen.addMeal('2013-05-02', 'Hauptgerichte', 'Gulasch',
-	[ 'Mit Süßspeise', 'Schwein', 'Farbstoff' ],
-	{ 'student': '5.35' })
-# create xml feed
-feed = canteen.toXMLFeed()
-```
+     And you a valid [OpenMensa V2 Feed][feed_v2]:
 
-creates the following XML, which can be easily parsed and processed by [OpenMensa][om]:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<openmensa version="2.0" xmlns="http://openmensa.org/open-mensa-v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://openmensa.org/open-mensa-v2 http://openmensa.org/open-mensa-v2.xsd">
-  <canteen>
-    <day date="2013-05-02">
-      <category name="Hauptgerichte">
-        <meal>
-          <name>Gulasch</name>
-          <note>Mit Süßspeise</note>
-          <note>Schwein</note>
-          <note>Farbstoff</note>
-          <price role="student">5.35</price>
-        </meal>
-      </category>
-    </day>
-  </canteen>
-</openmensa>
-```
-
-
-### addMeal
-
-The important method is `canteen.addMeal(date, category, name, notes=[], prices={}, priceRoles=None)`. The parameters are described inside the next sections.
-
-pyopenmensa preserves the ordering of adding the date into the feed in the scope of every day.
-
-
-### Dates
-
-There are some helper methods to work with dates itself:
-
-- `setDayClosed(date)`: Define that the canteen is closed on this date. All in the previous paragraph [described date formats][date-formats] are supported. If a day is closed, all stored meals for this day will be removed.
-- `clearDay(date)`: Remove all stored information about this date (meals or closed information). Again [all formats][date-formats] are supported.
-- `dayCount()`: Return the number of dates for which information are stored.
+     ```xml
+     <?xml version="1.0" encoding="UTF-8"?>
+     <openmensa version="2.0" xmlns="http://openmensa.org/open-mensa-v2"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://openmensa.org/open-mensa-v2 http://openmensa.org/open-mensa-v2.xsd">
+       <canteen>
+         <day date="2013-03-04">
+           <category name="Hauptgericht">
+             <meal>
+               <name>Gulasch</name>
+               <note>Mit Süßstoff</note>
+               <note>Schwein</note>
+               <price role="other">3.05</price>
+               <price role="student">2.03</price>
+             </meal>
+           </category>
+         </day>
+         <day date="2013-03-05">
+           <closed/>
+         </day>
+       </canteen>
+     </openmensa>
+     ```
 
 
-[date-formats]: #date-parsing
-[om]: http://openmensa.org
-[om-doc]:  http://doc.openmensa.org
+## Contributing
+
+1. Fork it.
+2. Create a branch (`git checkout -b my_markup`)
+3. Commit your changes (`git commit -am "Added Snarkdown"`)
+4. Push to the branch (`git push origin my_markup`)
+5. Open a [Pull Request][PR]
+6. Enjoy a refreshing Diet Coke and wait
+
+
+
+[om]: http://openmensa.org/
+[om-doc]:  http://doc.openmensa.org/
+[pyom-doc]: http://pyom.devtation.de/
 [feed_v2]: http://doc.openmensa.org/feed/v2/
-[py-date]: http://docs.python.org/3/library/datetime.html#date-objects
+[sphinx]: http://sphinx-doc.org/
+[python]: http://www.python.org/
+[PR]: https://github.com/mswart/pyopenmensa/pulls
