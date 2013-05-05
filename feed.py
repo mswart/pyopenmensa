@@ -97,6 +97,8 @@ class extractWeekDates():
 
 # Helpers for price handling
 # -------------------------------------
+
+#: The default regex that is used by :py:func:`.convertPrice` and :func:`.buildPrices`
 default_price_regex = re.compile('(?P<price>\d+[,.]\d{2}) ?(€)?', re.UNICODE)
 
 

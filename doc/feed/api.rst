@@ -1,37 +1,38 @@
 Feed API
 ========
+.. module:: pyopenmensa.feed
+
 
 Basic Canteen Handling
 ----------------------
 
-.. autoclass:: pyopenmensa.feed.BasicCanteen
+.. autoclass:: BasicCanteen
    :members:
 
 
 Lazy Canteen Handling
 ---------------------
 
-.. autoclass:: pyopenmensa.feed.LazyCanteen
+.. autoclass:: LazyCanteen
    :members:
-
 
 Dates
 ^^^^^
 
-.. autofunction:: pyopenmensa.feed.extractDate
-
+.. autofunction:: extractDate
 
 Prices
 ^^^^^^
 
-.. autofunction:: pyopenmensa.feed.convertPrice
+.. autofunction:: convertPrice
 
-.. autofunction:: pyopenmensa.feed.buildPrices
+.. autofunction:: buildPrices
 
+.. autodata:: default_price_regex
 
 Notes and Legends
 ^^^^^^^^^^^^^^^^^
 
-.. autofunction:: pyopenmensa.feed.extractNotes
+.. autofunction:: extractNotes
 
-.. autofunction:: pyopenmensa.feed.buildLegend
+.. autofunction:: buildLegend
