@@ -22,7 +22,10 @@ The white spaces and the dots in the last four formats are optional.
 Prices
 ------
 
-OpenMensa and pyopenmensa support also meal prices. The price can be specified for different roles. See the Documentation about `OpenMensa Feed V2`_ for all supported roles.
+OpenMensa and pyopenmensa support also meal prices. The price can be specified for different roles. See the Documentation about `OpenMensa Feed V2`__ for all supported roles.
+
+__ http://doc.openmensa.org/feed/v2/
+
 
 Internally pyopenmensa counts in cents (integers). But strings and floats can be converted with `canteen.buildPrices`. The following numbers are recognized as 3 Euro and 9 Cents:
 
