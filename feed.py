@@ -43,7 +43,11 @@ month_names = {
 
 
 def extractDate(text):
-    """ extract date"""
+    """ Tries to extract a date from a given :obj:`str`.
+
+        :param str text: Input date. A :obj:`datetime.date` object is passed
+             thought without modification.
+        :rtype: :obj:`datetime.date`"""
     if type(text) is datetime.date:
         return text
     match = date_format.search(text.lower())
@@ -98,17 +102,25 @@ class extractWeekDates():
 # Helpers for price handling
 # -------------------------------------
 
-#: The default regex that is used by :py:func:`.convertPrice` and :func:`.buildPrices`
+#: The default compiled regex that is used by :func:`.convertPrice` and
+#: :func:`.buildPrices`
 default_price_regex = re.compile('(?P<price>\d+[,.]\d{2}) ?(€)?', re.UNICODE)
 
 
-def convertPrice(variant, regex=default_price_regex):
+def convertPrice(variant, regex=None):
+    ''' Helper function to convert the given input price into integers (cents
+        count). :obj:`int`, :obj:`float` and :obj:`str` are supported
+
+        :param variant: Price
+        :param re.compile regex: Regex to convert str into price. The named
+             group `price` should have the format :regexp:`\\d+[,.]\\d{2}`
+        :rtype: int'''
     if type(variant) is int:
         return variant
     elif type(variant) is float:
         return round(variant * 100)
     elif type(variant) is str:
-        match = regex.search(variant)
+        match = (regex or default_price_regex).search(variant)
         if not match:
             raise ValueError('Could not extract price: {0}'.format(variant))
         return int(match.group('price').replace(',', '').replace('.', ''))
@@ -118,6 +130,10 @@ def convertPrice(variant, regex=default_price_regex):
 
 def buildPrices(data, roles=None, regex=default_price_regex,
                 default=None, additional={}):
+    ''' Create a dictionary with price information. Multiple ways are supported.
+
+        :rtype: :obj:`dict`: keys are role as str, values are the prices as
+             cent count'''
     if type(data) is dict:
         return dict(map(lambda item: (item[0], convertPrice(item[1])),
                         data.items()))
@@ -142,23 +158,50 @@ def buildPrices(data, roles=None, regex=default_price_regex,
 
 # Helpers for notes and legend handling
 # -------------------------------------
+
+#: Default regex str for :func:`buildLegend`
 default_legend_regex = '(?P<name>(\d|[a-z])+)\)\s*' + \
                        '(?P<value>\w+((\s+\w+)*[^0-9)]))'
+#: Default compiled regex for :func:`extractNotes`
 default_extra_regex = re.compile('\((?P<extra>[0-9a-zA-Z]{1,2}'
                                  '(?:,[0-9a-zA-Z]{1,2})*)\)', re.UNICODE)
 
 
-def buildLegend(legend={}, text=None, regex=default_legend_regex):
-    """ asdf """
+def buildLegend(legend={}, text=None, regex=None):
+    ''' Helper method to build or extend a legend from a text. The given regex
+        will be used to find legend inside the text.
+
+        :param dict legend: Initial legend data
+        :param str text: Text from which should legend information extracted.
+            None means do no extraction.
+        :param str regex: Regex to find legend part inside the given text. The
+            regex should have a named group `name` (key) and a named group
+            `value` (value).
+        :rtype: dict'''
     if text is not None:
-        for match in re.finditer(regex, text, re.UNICODE):
+        for match in re.finditer(regex, text or default_legend_regex, re.UNICODE):
             legend[match.group('name')] = match.group('value').strip()
     return legend
 
 
-def extractNotes(name, notes, legend=None, regex=default_extra_regex):
+def extractNotes(name, notes, legend=None, regex=None):
+    ''' This functions uses legend data to extract e.g. (1) references in a meal
+        name and add these in full text to the notes.
+
+        :param str name: The meal name
+        :param list notes: The initial list of notes for this meal
+        :param dict legend: The legend data. Use `None` to skip extraction. The
+            key is searched inside the meal name (with the given regex) and if
+            found the value is added to the notes list.
+        :param re.compile regex: The regex to find legend references in the meal name. The
+            regex should have on group which identifies the key in the legend
+            data. If you pass None the :py:data:`default_extra_regex` is used.
+            Only compiled regex are supported.
+        :rtype: tuple with name and notes'''
     if legend is None:
         return name, notes
+    if regex is None:
+        regex = default_extra_regex
     # extract note
     for note in list(','.join(regex.findall(name)).split(',')):
         if note and note in legend:
@@ -176,7 +219,7 @@ def extractNotes(name, notes, legend=None, regex=default_extra_regex):
 
 
 class BasicCanteen(object):
-    """ This class represents and stores all informations
+    """ This class represents and stores all information
         about OpenMensa canteens. It helps writing new
         python parsers with helper and shortcuts methods.
         So the complete object can be converted to a valid
@@ -199,12 +242,12 @@ class BasicCanteen(object):
             Additional the following data are also supported:
 
             :param notes: List of notes
-            :type notes: list of str
-            :param prices: Price of the meal; Every key must be a string for the role of the persons
-              who can use this tariff; The value is the price in Euro Cents,
-              The site of the OpenMensa project offers more detailed
-              information.
-            :type prices: dictionary {str: int} """
+            :type notes: list
+            :param prices: Price of the meal; Every key must be a string for the
+                 role of the persons who can use this tariff; The value is the
+                 price in Euro Cents, The site of the OpenMensa project offers
+                 more detailed information.
+            :type prices: dict"""
         # ensure we have an entry for this date
         date = self._handleDate(date)
         if date not in self._days:
@@ -216,17 +259,35 @@ class BasicCanteen(object):
         self._days[date][category].append((name, notes, prices))
 
     def setDayClosed(self, date):
+        """ Define that the canteen is closed on this date. If a day is closed,
+            all stored meals for this day will be removed.
+
+            :param date: Date of the day
+            :type date: datetime.date"""
         self._days[self._handleDate(date)] = False
 
     def clearDay(self, date):
+        """ Remove all stored information about this date (meals or closed
+            information).
+
+            :param date: Date of the day
+            :type date: datetime.date"""
         date = self._handleDate(date)
         if date in self._days:
             del self._days[date]
 
     def dayCount(self):
+        """ Return the number of dates for which information are stored.
+
+            :rtype: int"""
         return len(self._days)
 
     def hasMealsFor(self, date):
+        """ Checks whether for this day are information stored.
+
+            :param date: Date of the day
+            :type date: datetime.date
+            :rtype: bool"""
         date = self._handleDate(date)
         if date not in self._days or self._days[date] is False:
             return False
@@ -234,6 +295,13 @@ class BasicCanteen(object):
 
     @staticmethod
     def _handleDate(date):
+        """ Internal method that is used to handle/convert input date. It raises
+            a :exc:`ValueError` if the type is no :class:`datetime.date`. This
+            method should be overwritten in subclasses to support other date
+            input types.
+
+            :param date: input to be handled/converted
+            :rtype: datetime.date"""
         if type(date) is not datetime.date:
             raise TypeError('Dates needs to be specified by datetime.date')
         return date
@@ -242,7 +310,9 @@ class BasicCanteen(object):
     # ----------------------
     def toXMLFeed(self):
         """ Convert this cateen information into string
-            which is a valid OpenMensa v2 xml feed"""
+            which is a valid OpenMensa v2 xml feed
+
+            :rtype: str"""
         feed, document = self._createDocument()
         feed.appendChild(self.toTag(document))
         xml_header = '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -264,6 +334,15 @@ class BasicCanteen(object):
         return openmensa, output
 
     def toTag(self, output):
+        ''' This methods adds all data of this canteen as canteen xml tag
+        to the given xml Document.
+
+        :meth:`toXMLFeed` uses this method to create the XML Feed. So there is
+        normally no need to call it directly.
+
+        :param output: XML Document to which the data should be added
+        :type output: xml.dom.DOMImplementation.createDocument
+        '''
         # create canteen tag, which represents our data
         canteen = output.createElement('canteen')
         # iterate above all days (sorted):
@@ -338,15 +417,19 @@ class LazyCanteen(BasicCanteen):
         """ This is a helper function, which fast up the calculation
             of prices. It is useable if the canteen has fixed
             additional charges for special roles.
-            default specifies for which price role the price
-            of addMeal are.
-            additional is a dictonary which defines the extra
-            costs (value) for other roles (key)."""
+
+            :param str default: specifies for which price role the price of
+                addMeal are.
+            :param dict additional: Defines the extra costs (value) for other
+                roles (key)."""
         self.additionalCharges = (default, buildPrices(additional))
 
     def addMeal(self, date, category, name, notes=[], prices={}, roles=None):
         """ Same as :py:meth:`.BasicCanteen.addMeal` but uses
-            helper functions to convert input parameters into needed types. """
+            helper functions to convert input parameters into needed types.
+            The following paramer is new:
+
+            :param roles:  Is passed as role parameter to :func:`buildPrices`"""
         if self.legendData:  # do legend extraction
             name, notes = extractNotes(name, notes, legend=self.legendData)
         prices = buildPrices(prices, roles,

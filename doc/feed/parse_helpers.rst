@@ -1,12 +1,12 @@
 Parse helpers
 =============
-.. module:: pyopenmensa.feed
+.. currentmodule:: pyopenmensa.feed
 
 
 Date parsing
 ------------
 
-The first parameter of :meth:`.BasicCanteen.addMeal` specify the date. It should be a [python `datetime.Date` object][py-date]. If you pass a `str`, pyopenmensa tries to extract a date from it. Around the date itself can be garbage strings. The following date formats for the 6th March 2013:
+The first parameter of :meth:`.BasicCanteen.addMeal` specify the date. It should be a :obj:`datetime.date`. :meth:`.LazyCanteen.addMeal` supports also :obj:`str` as type: pyopenmensa tries to extract a date from it with :func:`extractDate`. Around the date itself can be garbage strings. The following date formats are recognized as 6th March 2013:
 
 - **2013-03-06**, 2013-03-6, 2013-3-06, 2013-3-6
 - **13-03-06**, 13-03-6, 13-3-06, 13-3-6

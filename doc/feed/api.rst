@@ -8,6 +8,7 @@ Basic Canteen Handling
 
 .. autoclass:: BasicCanteen
    :members:
+   :private-members: _handleDate
 
 
 Lazy Canteen Handling
@@ -33,6 +34,10 @@ Prices
 Notes and Legends
 ^^^^^^^^^^^^^^^^^
 
+.. autofunction:: buildLegend
+
+.. autodata:: default_legend_regex
+
 .. autofunction:: extractNotes
 
-.. autofunction:: buildLegend
+.. autodata:: default_extra_regex
