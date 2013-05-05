@@ -2,12 +2,12 @@
 import pytest
 from datetime import date
 
-from pyopenmensa.feed import BasicCanteen
+from pyopenmensa.feed import BaseBuilder
 
 
 @pytest.fixture
 def canteen():
-    return BasicCanteen()
+    return BaseBuilder()
 
 
 def test_day_count(canteen):

@@ -3,18 +3,18 @@ Feed API
 .. module:: pyopenmensa.feed
 
 
-Basic Canteen Handling
-----------------------
+Base Canteen Feed Builder
+-------------------------
 
-.. autoclass:: BasicCanteen
+.. autoclass:: BaseBuilder
    :members:
    :private-members: _handleDate
 
 
-Lazy Canteen Handling
----------------------
+Lazy Canteen Feed Builder
+-------------------------
 
-.. autoclass:: LazyCanteen
+.. autoclass:: LazyBuilder
    :members:
 
 Dates

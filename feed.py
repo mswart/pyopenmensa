@@ -214,11 +214,11 @@ def extractNotes(name, notes, legend=None, regex=None):
     return name, notes
 
 
-# Basic canteen with meal data
-# ----------------------------
+# Base canteen with meal data
+# ---------------------------
 
 
-class BasicCanteen(object):
+class BaseBuilder(object):
     """ This class represents and stores all information
         about OpenMensa canteens. It helps writing new
         python parsers with helper and shortcuts methods.
@@ -400,11 +400,11 @@ class BasicCanteen(object):
 # ----------------------------------------------------------
 
 
-class LazyCanteen(BasicCanteen):
+class LazyBuilder(BaseBuilder):
     """ asdf"""
 
     def __init__(self):
-        super(LazyCanteen, self).__init__()
+        super(LazyBuilder, self).__init__()
         self.legendData = None
         self.additionalCharges = (None, {})
 
@@ -425,7 +425,7 @@ class LazyCanteen(BasicCanteen):
         self.additionalCharges = (default, buildPrices(additional))
 
     def addMeal(self, date, category, name, notes=[], prices={}, roles=None):
-        """ Same as :py:meth:`.BasicCanteen.addMeal` but uses
+        """ Same as :py:meth:`.BaseBuilder.addMeal` but uses
             helper functions to convert input parameters into needed types.
             The following paramer is new:
 
@@ -435,11 +435,11 @@ class LazyCanteen(BasicCanteen):
         prices = buildPrices(prices, roles,
                              default=self.additionalCharges[0],
                              additional=self.additionalCharges[1])
-        super(LazyCanteen, self).addMeal(extractDate(date), category, name,
+        super(LazyBuilder, self).addMeal(extractDate(date), category, name,
                                          notes, prices)
 
     @staticmethod
     def _handleDate(date):
         return extractDate(date)
 
-OpenMensaCanteen = LazyCanteen
+OpenMensaCanteen = LazyBuilder

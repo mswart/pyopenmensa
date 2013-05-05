@@ -2,12 +2,12 @@
 import pytest
 from datetime import date
 
-from pyopenmensa.feed import LazyCanteen
+from pyopenmensa.feed import LazyBuilder
 
 
 @pytest.fixture
 def canteen():
-    return LazyCanteen()
+    return LazyBuilder()
 
 
 def test_date_converting(canteen):

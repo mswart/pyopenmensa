@@ -28,9 +28,9 @@ The documentation is created with [Spinx][sphinx] and the documentation source c
 3.   Create Feed builder:
 
      ```python
-     # import LazyCanteen - the container for all meals
-     from pyopenmensa.feed import LazyCanteen
-     canteen = LazyCanteen() # canteen container
+     # import LazyBuilder - the container for all meals
+     from pyopenmensa.feed import LazyBuilder
+     canteen = LazyBuilder() # canteen container
      ```
 
 4.   Add feed data (PyOpenMensa can do basic parsing and converting):

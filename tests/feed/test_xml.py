@@ -3,15 +3,15 @@ from datetime import date
 import pytest
 from xml.etree.ElementTree import fromstring as parse
 
-from pyopenmensa.feed import BasicCanteen, LazyCanteen
+from pyopenmensa.feed import BaseBuilder, LazyBuilder
 
 
-@pytest.fixture(params=['basic', 'lazy'])
+@pytest.fixture(params=['base', 'lazy'])
 def canteen(request):
-    if request.param == 'basic':
-        return BasicCanteen()
+    if request.param == 'base':
+        return BaseBuilder()
     else:
-        return LazyCanteen()
+        return LazyBuilder()
 
 
 def tag(name):
