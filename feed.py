@@ -179,7 +179,7 @@ def buildLegend(legend={}, text=None, regex=None):
             `value` (value).
         :rtype: dict'''
     if text is not None:
-        for match in re.finditer(regex, text or default_legend_regex, re.UNICODE):
+        for match in re.finditer(regex or default_legend_regex, text, re.UNICODE):
             legend[match.group('name')] = match.group('value').strip()
     return legend
 
