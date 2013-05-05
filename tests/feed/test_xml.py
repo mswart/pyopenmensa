@@ -102,7 +102,7 @@ def test_meal(canteen):
     assert len(meal.attrib) == 0
     assert len(meal) == 1
     assert meal[0].tag == tag('name')
-    assert meal[0].text == 'Gulasch'
+    assert meal[0].text.strip() == 'Gulasch'
 
 
 def test_notes(canteen):
@@ -113,7 +113,7 @@ def test_notes(canteen):
     xml_notes = []
     for element in meal:
         if element.tag == tag('note'):
-            xml_notes.append(element.text)
+            xml_notes.append(element.text.strip())
     assert xml_notes == notes
 
 
@@ -127,5 +127,5 @@ def test_prices(canteen):
     for element in meal:
         if element.tag == tag('price'):
             assert list(element.attrib.keys()) == ['role']
-            xml_prices[element.attrib['role']] = element.text
+            xml_prices[element.attrib['role']] = element.text.strip()
     assert xml_prices == prices_output
