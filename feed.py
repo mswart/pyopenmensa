@@ -173,7 +173,7 @@ def extractNotes(name, notes, legend=None, regex=default_extra_regex):
 # ----------------------------
 
 
-class BasicCanteen():
+class BasicCanteen(object):
     """ This class represents and stores all informations
         about OpenMensa canteens. It helps writing new
         python parsers with helper and shortcuts methods.
