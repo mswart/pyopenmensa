@@ -147,6 +147,7 @@ default_extra_regex = re.compile('\((?P<extra>[0-9a-zA-Z]{1,2}'
 
 
 def buildLegend(legend={}, text=None, regex=default_legend_regex):
+    """ asdf """
     if text is not None:
         for match in re.finditer(regex, text, re.UNICODE):
             legend[match.group('name')] = match.group('value').strip()
@@ -185,16 +186,23 @@ class BasicCanteen():
     def addMeal(self, date, category, name, notes=[], prices={}):
         """ This is the main helper, it adds a meal to the
             canteen. The following data are needed:
-            * date date: Date for the meal
-            * categor str: Name of the meal category
-            * name str: Meal name
+
+            :param date: Date for the meal
+            :type date: datetime.date
+            :param category:  Name of the meal category
+            :type category: str
+            :param meal: Meal name
+            :type meal: str
+
             Additional the following data are also supported:
-            * notes list[]: List of notes (as List of strings)
-            * prices {str: int}: Price of the meal; Every
-            key must be a string for the role of the persons
-            who can use this tariff; The value is the price in Euro Cents,
-            The site of the OpenMensa project offers more detailed
-            information."""
+
+            :param notes: List of notes
+            :type notes: list of str
+            :param prices: Price of the meal; Every key must be a string for the role of the persons
+              who can use this tariff; The value is the price in Euro Cents,
+              The site of the OpenMensa project offers more detailed
+              information.
+            :type prices: dictionary {str: int} """
         # ensure we have an entry for this date
         date = self._handleDate(date)
         if date not in self._days:
@@ -320,6 +328,8 @@ class LazyCanteen(BasicCanteen):
         self.additionalCharges = (None, {})
 
     def setLegendData(self, *args, **kwargs):
+        """ Set or genernate the legend data from this canteen.
+            Uses :py:func:`.buildLegend` for genernating """
         self.legendData = buildLegend(*args, **kwargs)
 
     def setAdditionalCharges(self, default, additional):
@@ -333,6 +343,8 @@ class LazyCanteen(BasicCanteen):
         self.additionalCharges = (default, buildPrices(additional))
 
     def addMeal(self, date, category, name, notes=[], prices={}, roles=None):
+        """ Same as :py:meth:`.BasicCanteen.addMeal` but uses
+            helper functions to convert input parameters into needed types. """
         if self.legendData:  # do legend extraction
             name, notes = extractNotes(name, notes, legend=self.legendData)
         prices = buildPrices(prices, roles,

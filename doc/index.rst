@@ -6,13 +6,21 @@
 Welcome to PyOpenMensa's documentation!
 =======================================
 
+This small python library helps you to work with OpenMensa_ by:
+
+* **support writing canteen feeds**: :ref:`feed` makes it very easy to generate a valid `OpenMensa Feed V2`_
+* **python wrapper for OpenMensa data**: Access data (canteens, meals) transparent from OpenMensa_. **(in development)**
+
+More information about OpenMensa and all possibilities for developers can be found in the `OpenMensa Documentation`_.
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
+   :numbered:
 
-   tutorial
-   reference
+   install
+   feed/index
 
 
 Indices and tables
@@ -22,3 +30,6 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
+.. _OpenMensa: http://openmensa.org
+.. _`OpenMensa Feed V2`: http://doc.openmensa.org/feed/v2
+.. _`OpenMensa Documentation`: http://doc.openmensa.org
