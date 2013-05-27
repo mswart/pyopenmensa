@@ -232,12 +232,11 @@ class BaseBuilder(object):
         """ This is the main helper, it adds a meal to the
             canteen. The following data are needed:
 
-            :param date: Date for the meal
-            :type date: datetime.date
-            :param category:  Name of the meal category
-            :type category: str
-            :param meal: Meal name
-            :type meal: str
+            :param datetime.date date: Date for the meal
+            :param str category:  Name of the meal category
+            :param str meal: Meal name.
+
+            :raises ValueError: if the meal name is long that 250 characters!
 
             Additional the following data are also supported:
 
@@ -255,6 +254,9 @@ class BaseBuilder(object):
         # ensure we have a category element for this category
         if category not in self._days[date]:
             self._days[date][category] = []
+        # check name:
+        if len(name) > 250:
+            raise ValueError('Meals names must be shorter than 251 characters!')
         # add meal into category:
         self._days[date][category].append((name, notes, prices))
 
@@ -401,7 +403,8 @@ class BaseBuilder(object):
 
 
 class LazyBuilder(BaseBuilder):
-    """ asdf"""
+    """ An extended builder class which uses a set of helper and auto-converting
+        functions to reduce common converting tasks"""
 
     def __init__(self):
         super(LazyBuilder, self).__init__()
@@ -427,6 +430,7 @@ class LazyBuilder(BaseBuilder):
     def addMeal(self, date, category, name, notes=[], prices={}, roles=None):
         """ Same as :py:meth:`.BaseBuilder.addMeal` but uses
             helper functions to convert input parameters into needed types.
+            Meals names are auto-shortend to the allowed 250 characters.
             The following paramer is new:
 
             :param roles:  Is passed as role parameter to :func:`buildPrices`"""
@@ -435,6 +439,8 @@ class LazyBuilder(BaseBuilder):
         prices = buildPrices(prices, roles,
                              default=self.additionalCharges[0],
                              additional=self.additionalCharges[1])
+        if len(name) > 250:
+            name = name[:247] + '...'
         super(LazyBuilder, self).addMeal(extractDate(date), category, name,
                                          notes, prices)
 

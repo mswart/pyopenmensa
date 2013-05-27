@@ -32,3 +32,9 @@ def test_add_meal(canteen):
     day = date(2013, 3, 7)
     canteen.addMeal(day, 'Hauptgericht', 'Gulasch')
     assert canteen.hasMealsFor(day)
+
+
+def test_to_long_meal_name(canteen):
+    day = date(2013, 3, 7)
+    with pytest.raises(ValueError):
+        canteen.addMeal(day, 'Hauptgericht', 'Y'*251)
