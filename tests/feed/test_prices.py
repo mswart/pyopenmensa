@@ -26,6 +26,10 @@ class TestPriceConverting():
         assert convertPrice('as 3,04 hans') == 304
         assert convertPrice('14,3 2 12,4,4 13.04') == 1304
 
+    def test_str_only_euro(self):
+        assert convertPrice('3 €') == 300
+        assert convertPrice('4€') == 400
+
     def test_garbage_strings(self):
         with pytest.raises(ValueError):
             convertPrice('34,3,3 €')
