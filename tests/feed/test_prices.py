@@ -30,6 +30,11 @@ class TestPriceConverting():
         assert convertPrice('3 €') == 300
         assert convertPrice('4€') == 400
 
+    def test_single_cent_converting(self):
+        assert convertPrice('as 3,4 € hans') == 340
+        with pytest.raises(ValueError):
+            convertPrice('3,4 ')
+
     def test_garbage_strings(self):
         with pytest.raises(ValueError):
             convertPrice('34,3,3 €')

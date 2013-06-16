@@ -104,8 +104,8 @@ class extractWeekDates():
 
 #: The default compiled regex that is used by :func:`.convertPrice` and
 #: :func:`.buildPrices`
-default_price_regex = re.compile('(?P<price>\d+[,.]\d{2}) ?(€)?', re.UNICODE)
-short_price_regex = re.compile('[^\d]*(?P<price>\d+) ?€[^\d]*', re.UNICODE)
+default_price_regex = re.compile(r'(^|[^\d,.])(?P<euro>\d+)[,.](?P<cent>\d{2}|\d{1}(?=\s*€))', re.UNICODE)
+short_price_regex = re.compile(r'[^\d]*(?P<euro>\d+)\s*€[^\d]*', re.UNICODE)
 
 
 def convertPrice(variant, regex=None, short_regex=None):
@@ -113,23 +113,21 @@ def convertPrice(variant, regex=None, short_regex=None):
         count). :obj:`int`, :obj:`float` and :obj:`str` are supported
 
         :param variant: Price
-        :param re.compile regex: Regex to convert str into price. The named
-             group `price` should have the format :regexp:`\\d+[,.]\\d{2}`
+        :param re.compile regex: Regex to convert str into price. The re should
+             contain two named groups `euro` and `cent`
         :param re.compile short_regex: Short regex version (no cent part)
-             group `group` should contain a valid integer.
+             group `euro` should contain a valid integer.
         :rtype: int'''
     if type(variant) is int:
         return variant
     elif type(variant) is float:
         return round(variant * 100)
     elif type(variant) is str:
-        match = (regex or default_price_regex).search(variant)
-        if match:
-            return int(match.group('price').replace(',', '').replace('.', ''))
-        match = (short_regex or short_price_regex).match(variant)
-        if match:
-            return int(match.group('price')) * 100
-        raise ValueError('Could not extract price: {0}'.format(variant))
+        match = (regex or default_price_regex).search(variant) \
+            or (short_regex or short_price_regex).match(variant)
+        if not match:
+            raise ValueError('Could not extract price: {0}'.format(variant))
+        return int(match.group('euro')) * 100 + int(match.groupdict().get('cent', '').ljust(2, '0'))
     else:
         raise TypeError('Unknown price type: {0!r}'.format(variant))
 
