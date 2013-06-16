@@ -40,3 +40,11 @@ def test_to_long_meal_name(canteen):
     day = date(2013, 3, 7)
     canteen.addMeal(day, 'Hauptgericht', 'Y'*251)
     canteen.hasMealsFor(day)
+
+
+def test_caseinsensitive_notes(canteen):
+    day = date(2013, 3, 7)
+    canteen.legendKeyFunc = lambda v: v.lower()
+    canteen.setLegendData(legend={'f': 'Note'})
+    canteen.addMeal(day, 'Test', 'Essen(F)')
+    assert canteen._days[day]['Test'][0] == ('Essen', ['Note'], {})

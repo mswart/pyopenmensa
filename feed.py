@@ -171,7 +171,7 @@ default_extra_regex = re.compile('\((?P<extra>[0-9a-zA-Z]{1,2}'
                                  '(?:,[0-9a-zA-Z]{1,2})*)\)', re.UNICODE)
 
 
-def buildLegend(legend={}, text=None, regex=None):
+def buildLegend(legend=None, text=None, regex=None, key=lambda v: v):
     ''' Helper method to build or extend a legend from a text. The given regex
         will be used to find legend inside the text.
 
@@ -181,14 +181,17 @@ def buildLegend(legend={}, text=None, regex=None):
         :param str regex: Regex to find legend part inside the given text. The
             regex should have a named group `name` (key) and a named group
             `value` (value).
+        :param callable key: function to map the key to a legend key
         :rtype: dict'''
+    if legend is None:
+        legend = {}
     if text is not None:
         for match in re.finditer(regex or default_legend_regex, text, re.UNICODE):
-            legend[match.group('name')] = match.group('value').strip()
+            legend[key(match.group('name'))] = match.group('value').strip()
     return legend
 
 
-def extractNotes(name, notes, legend=None, regex=None):
+def extractNotes(name, notes, legend=None, regex=None, key=lambda v: v):
     ''' This functions uses legend data to extract e.g. (1) references in a meal
         name and add these in full text to the notes.
 
@@ -201,6 +204,7 @@ def extractNotes(name, notes, legend=None, regex=None):
             regex should have on group which identifies the key in the legend
             data. If you pass None the :py:data:`default_extra_regex` is used.
             Only compiled regex are supported.
+        :param callable key: function to map the key to a legend key
         :rtype: tuple with name and notes'''
     if legend is None:
         return name, notes
@@ -208,10 +212,13 @@ def extractNotes(name, notes, legend=None, regex=None):
         regex = default_extra_regex
     # extract note
     for note in list(','.join(regex.findall(name)).split(',')):
-        if note and note in legend:
+        if not note:
+            continue
+        note = key(note)
+        if note in legend:
             if legend[note] not in notes:
                 notes.append(legend[note])
-        elif note:  # skip empty notes
+        else:
             print('could not find extra note "{0}"'.format(note))
     # from notes from name
     name = regex.sub('', name).replace('\xa0', ' ').replace('  ', ' ').strip()
@@ -232,7 +239,7 @@ class BaseBuilder(object):
     def __init__(self):
         self._days = {}
 
-    def addMeal(self, date, category, name, notes=[], prices={}):
+    def addMeal(self, date, category, name, notes=None, prices=None):
         """ This is the main helper, it adds a meal to the
             canteen. The following data are needed:
 
@@ -262,7 +269,7 @@ class BaseBuilder(object):
         if len(name) > 250:
             raise ValueError('Meals names must be shorter than 251 characters!')
         # add meal into category:
-        self._days[date][category].append((name, notes, prices))
+        self._days[date][category].append((name, notes or [], prices or {}))
 
     def setDayClosed(self, date):
         """ Define that the canteen is closed on this date. If a day is closed,
@@ -413,12 +420,16 @@ class LazyBuilder(BaseBuilder):
     def __init__(self):
         super(LazyBuilder, self).__init__()
         self.legendData = None
+        #: function passed as key parameter to :py:func:`.buildLegend` and
+        #: :py:func:`.extractNotes`; use `lambda v: v.lower()` for case-insensitive
+        #: legend names (instance member)
+        self.legendKeyFunc = lambda v: v
         self.additionalCharges = (None, {})
 
     def setLegendData(self, *args, **kwargs):
         """ Set or genernate the legend data from this canteen.
             Uses :py:func:`.buildLegend` for genernating """
-        self.legendData = buildLegend(*args, **kwargs)
+        self.legendData = buildLegend(*args, key=self.legendKeyFunc, **kwargs)
 
     def setAdditionalCharges(self, default, additional):
         """ This is a helper function, which fast up the calculation
@@ -431,7 +442,7 @@ class LazyBuilder(BaseBuilder):
                 roles (key)."""
         self.additionalCharges = (default, buildPrices(additional))
 
-    def addMeal(self, date, category, name, notes=[], prices={}, roles=None):
+    def addMeal(self, date, category, name, notes=None, prices=None, roles=None):
         """ Same as :py:meth:`.BaseBuilder.addMeal` but uses
             helper functions to convert input parameters into needed types.
             Meals names are auto-shortend to the allowed 250 characters.
@@ -439,14 +450,15 @@ class LazyBuilder(BaseBuilder):
 
             :param roles:  Is passed as role parameter to :func:`buildPrices`"""
         if self.legendData:  # do legend extraction
-            name, notes = extractNotes(name, notes, legend=self.legendData)
-        prices = buildPrices(prices, roles,
+            name, notes = extractNotes(name, notes or [], legend=self.legendData,
+                                       key=self.legendKeyFunc)
+        prices = buildPrices(prices or {}, roles,
                              default=self.additionalCharges[0],
                              additional=self.additionalCharges[1])
         if len(name) > 250:
             name = name[:247] + '...'
         super(LazyBuilder, self).addMeal(extractDate(date), category, name,
-                                         notes, prices)
+                                         notes or [], prices)
 
     @staticmethod
     def _handleDate(date):
