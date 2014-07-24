@@ -118,11 +118,11 @@ def convertPrice(variant, regex=None, short_regex=None):
         :param re.compile short_regex: Short regex version (no cent part)
              group `euro` should contain a valid integer.
         :rtype: int'''
-    if type(variant) is int:
+    if isinstance(variant, int):
         return variant
-    elif type(variant) is float:
+    elif isinstance(variant, float):
         return round(variant * 100)
-    elif type(variant) is str:
+    elif isinstance(variant, str):
         match = (regex or default_price_regex).search(variant) \
             or (short_regex or short_price_regex).match(variant)
         if not match:
