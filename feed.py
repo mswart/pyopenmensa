@@ -138,10 +138,10 @@ def buildPrices(data, roles=None, regex=default_price_regex,
 
         :rtype: :obj:`dict`: keys are role as str, values are the prices as
              cent count'''
-    if type(data) is dict:
+    if isinstance(data, dict):
         return dict(map(lambda item: (item[0], convertPrice(item[1])),
                         data.items()))
-    elif type(data) in [str, float, int]:
+    elif isinstance(data, (str, float, int)) and not isinstance(data, bool):
         if default is None:
             raise ValueError('You have to call setAdditionalCharges '
                              'before it is possible to pass a string as price')
