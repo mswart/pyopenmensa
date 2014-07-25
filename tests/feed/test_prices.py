@@ -45,6 +45,30 @@ class TestPriceConverting():
         assert convertPrice(3.61234) == 361
         assert convertPrice(13.25534) == 1326
 
+    def test_custom_str2price_convert(self):
+        class CustomStr(str): pass
+
+        assert convertPrice(CustomStr('3.04 €')) == 304
+        assert convertPrice(CustomStr('3.04€')) == 304
+        assert convertPrice(CustomStr('3.04')) == 304
+        assert convertPrice(CustomStr('13.04 €')) == 1304
+
+    def test_custom_int2price_convert(self):
+        class CustomInt(int): pass
+
+        assert convertPrice(CustomInt(3)) == 3
+        assert convertPrice(CustomInt(365)) == 365
+        assert convertPrice(CustomInt(361)) == 361
+        assert convertPrice(CustomInt(1326)) == 1326
+
+    def test_custom_float2price_convert(self):
+        class CustomFloat(float): pass
+
+        assert convertPrice(CustomFloat(3.00)) == 300
+        assert convertPrice(CustomFloat(3.65)) == 365
+        assert convertPrice(CustomFloat(3.61234)) == 361
+        assert convertPrice(CustomFloat(13.25534)) == 1326
+
     def test_wrong_types(self):
         with pytest.raises(TypeError):
             convertPrice(True)
