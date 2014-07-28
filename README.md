@@ -4,7 +4,7 @@
 
 This small python library helps you to work with [OpenMensa][om] by:
 
-* **support writing canteen feeds**: [The feed module](#generating-openmensa-feeds) makes it very easy to generate a valid [OpenMensa Feed V2][feed_v2]
+* **support writing canteen feeds**: [The feed module](#generating-openmensa-feeds) makes it very easy to generate a valid [OpenMensa Feed V2][feed_v2]. This is in production use for the majority of canteens in [OpenMensa][om].
 * **python wrapper for OpenMensa data**: Access data (canteens, meals) transparent from [openmensa][om]. **(in development)**
 
 More information about [OpenMensa and all possibilities for developers][om-doc].
@@ -19,11 +19,19 @@ The documentation is created with [Spinx][sphinx] and the documentation source c
 ## tldr: Documentation
 
 1.   You need [Python][python] 2.6, 2.7 or **>=3.2**.
-2.   Install pyopenmensa via git:
+2.   Install pyopenmensa:
 
-     ```bash
-     git clone git://github.com/mswart/pyopenmensa
-     ```
+     1. via pypi
+
+        ```bash
+        pip install pyopenmensa
+        ```
+
+     2. via git
+
+         ```bash
+         git clone git://github.com/mswart/pyopenmensa
+         ```
 
 3.   Create Feed builder:
 
@@ -50,7 +58,7 @@ The documentation is created with [Spinx][sphinx] and the documentation source c
      print(canteen.toXMLFeed())
      ```
 
-     And you a valid [OpenMensa V2 Feed][feed_v2]:
+     And you have a valid [OpenMensa V2 Feed][feed_v2]:
 
      ```xml
      <?xml version="1.0" encoding="UTF-8"?>
@@ -84,6 +92,12 @@ The documentation is created with [Spinx][sphinx] and the documentation source c
 5. Open a [Pull Request][PR]
 6. Enjoy a refreshing Diet Coke and wait
 
+
+## License
+
+LGPL License
+
+Copyright (c) 2012-2014 Malte Swart. LGPL license, see LICENSE for more details.
 
 
 [om]: http://openmensa.org/
