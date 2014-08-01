@@ -1,9 +1,16 @@
 language: python
 python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
-  - "3.3"
-  - "pypy"
-# command to run tests
-script: "py.test"
+- '2.6'
+- '2.7'
+- '3.2'
+- '3.3'
+- pypy
+script: py.test
+deploy:
+  provider: pypi
+  user: mswart
+  password:
+    secure: sWG2jVIUMz1lCkEAui+aODgXlw3w00dPNw2dCmsc5Rd2ZZpV0GLSo54TbqdFNgMQntNIpPekfzbph75b8Haewks9/J/QXvmr/ompmHjekQSOOu14JtcL9jllEjCaejiT8p5eIjDbdB0hE/ajgXA3J5gdAlZJXUVc5niLOp8+Cdk=
+  on:
+    tags: true
+    repo: mswart/pyopenmensa
