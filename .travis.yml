@@ -13,4 +13,6 @@ deploy:
     secure: sWG2jVIUMz1lCkEAui+aODgXlw3w00dPNw2dCmsc5Rd2ZZpV0GLSo54TbqdFNgMQntNIpPekfzbph75b8Haewks9/J/QXvmr/ompmHjekQSOOu14JtcL9jllEjCaejiT8p5eIjDbdB0hE/ajgXA3J5gdAlZJXUVc5niLOp8+Cdk=
   on:
     tags: true
+    all_branches: true
+    python: '3.2'
     repo: mswart/pyopenmensa
