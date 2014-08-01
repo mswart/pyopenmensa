@@ -45,6 +45,30 @@ class TestPriceConverting():
         assert convertPrice(3.61234) == 361
         assert convertPrice(13.25534) == 1326
 
+    def test_custom_str2price_convert(self):
+        class CustomStr(str): pass
+
+        assert convertPrice(CustomStr('3.04 €')) == 304
+        assert convertPrice(CustomStr('3.04€')) == 304
+        assert convertPrice(CustomStr('3.04')) == 304
+        assert convertPrice(CustomStr('13.04 €')) == 1304
+
+    def test_custom_int2price_convert(self):
+        class CustomInt(int): pass
+
+        assert convertPrice(CustomInt(3)) == 3
+        assert convertPrice(CustomInt(365)) == 365
+        assert convertPrice(CustomInt(361)) == 361
+        assert convertPrice(CustomInt(1326)) == 1326
+
+    def test_custom_float2price_convert(self):
+        class CustomFloat(float): pass
+
+        assert convertPrice(CustomFloat(3.00)) == 300
+        assert convertPrice(CustomFloat(3.65)) == 365
+        assert convertPrice(CustomFloat(3.61234)) == 361
+        assert convertPrice(CustomFloat(13.25534)) == 1326
+
     def test_wrong_types(self):
         with pytest.raises(TypeError):
             convertPrice(True)
@@ -59,11 +83,24 @@ class TestPriceDictBuilding():
         'others': 414
     }
 
+    single_price_example = {
+        'student': 364
+    }
+
     def test_dict_passthrought(self):
         d = {
             'student': 354,
             'other': 375
         }
+        assert buildPrices(d) == d
+
+    def test_custom_dict_passthrough(self):
+        class CustomDict(dict): pass
+
+        d = CustomDict()
+        d['student'] = 354
+        d['other'] = 375
+
         assert buildPrices(d) == d
 
     def test_dict_type_converting(self):
@@ -76,12 +113,46 @@ class TestPriceDictBuilding():
             ('student', 'employee', 'others')
         ) == self.price_example
 
+    def test_build_from_prices_and_roles_with_custom_types(self):
+        class CustomStr(str): pass
+        class CustomFloat(float): pass
+        class CustomInt(int): pass
+
+        assert buildPrices(
+            [CustomStr('3.64€'), CustomFloat(3.84), CustomInt(414)],
+            ('student', 'employee', 'others')
+        ) == self.price_example
+
     def test_addtional_charges(self):
         assert buildPrices(
             3.64,
             default='student',
             additional={'employee': '0.20€', 'others': 50}
         ) == self.price_example
+
+    def test_build_from_custom_str_subtype(self):
+        class CustomStr(str): pass
+
+        assert buildPrices(
+            CustomStr('3.64€'),
+            default='student',
+        ) == self.single_price_example
+
+    def test_build_from_custom_int_subtype(self):
+        class CustomInt(int): pass
+
+        assert buildPrices(
+            CustomInt(364),
+            default='student',
+        ) == self.single_price_example
+
+    def test_build_from_custom_float_subtype(self):
+        class CustomFloat(float): pass
+
+        assert buildPrices(
+            CustomFloat(3.64),
+            default='student',
+        ) == self.single_price_example
 
     def test_wrong_price_types(self):
         with pytest.raises(TypeError):

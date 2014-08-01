@@ -118,11 +118,11 @@ def convertPrice(variant, regex=None, short_regex=None):
         :param re.compile short_regex: Short regex version (no cent part)
              group `euro` should contain a valid integer.
         :rtype: int'''
-    if type(variant) is int:
+    if isinstance(variant, int) and not isinstance(variant, bool):
         return variant
-    elif type(variant) is float:
+    elif isinstance(variant, float):
         return round(variant * 100)
-    elif type(variant) is str:
+    elif isinstance(variant, str):
         match = (regex or default_price_regex).search(variant) \
             or (short_regex or short_price_regex).match(variant)
         if not match:
@@ -138,10 +138,10 @@ def buildPrices(data, roles=None, regex=default_price_regex,
 
         :rtype: :obj:`dict`: keys are role as str, values are the prices as
              cent count'''
-    if type(data) is dict:
+    if isinstance(data, dict):
         return dict(map(lambda item: (item[0], convertPrice(item[1])),
                         data.items()))
-    elif type(data) in [str, float, int]:
+    elif isinstance(data, (str, float, int)) and not isinstance(data, bool):
         if default is None:
             raise ValueError('You have to call setAdditionalCharges '
                              'before it is possible to pass a string as price')
