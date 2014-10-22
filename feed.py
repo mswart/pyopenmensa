@@ -241,6 +241,7 @@ class BaseBuilder(object):
         python parsers with helper and shortcuts methods.
         So the complete object can be converted to a valid
         OpenMensa v2 xml feed string. """
+    allowed_price_roles = ['pupil', 'student', 'employee', 'other']
 
     def __init__(self):
         self._days = {}
@@ -254,6 +255,8 @@ class BaseBuilder(object):
             :param str meal: Meal name.
 
             :raises ValueError: if the meal name is long that 250 characters!
+            :raises ValueError: if the price role is unknown
+            :raises TypeError: if the price value is not an integer
 
             Additional the following data are also supported:
 
@@ -274,8 +277,17 @@ class BaseBuilder(object):
         # check name:
         if len(name) > 250:
             raise ValueError('Meal names must be shorter than 251 characters!')
+        # process prices:
+        if prices is None:
+            prices = {}
+        else:
+            for role in prices:
+                if role not in self.allowed_price_roles:
+                    raise ValueError('Unknown price role "%s"' % role)
+                if not isinstance(prices[role], int):
+                    raise TypeError('Unsupport price type - expect integer')
         # add meal into category:
-        self._days[date][category].append((name, notes or [], prices or {}))
+        self._days[date][category].append((name, notes or [], prices))
 
     def setDayClosed(self, date):
         """ Define that the canteen is closed on this date. If a day is closed,
