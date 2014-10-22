@@ -104,7 +104,9 @@ class extractWeekDates():
 
 #: The default compiled regex that is used by :func:`.convertPrice` and
 #: :func:`.buildPrices`
-default_price_regex = re.compile(r'(^|[^\d,.])(?P<euro>\d+)[,.](?P<cent>\d{2}|\d{1}(?=\s*€))', re.UNICODE)
+default_price_regex = re.compile(r'(^|[^\d,.])(?P<euro>\d+)[,.]' +
+                                 r'(?P<cent>\d{2}|\d{1}(?=\s*€))',
+                                 re.UNICODE)
 short_price_regex = re.compile(r'[^\d]*(?P<euro>\d+)\s*€[^\d]*', re.UNICODE)
 
 
@@ -127,14 +129,16 @@ def convertPrice(variant, regex=None, short_regex=None):
             or (short_regex or short_price_regex).match(variant)
         if not match:
             raise ValueError('Could not extract price: {0}'.format(variant))
-        return int(match.group('euro')) * 100 + int(match.groupdict().get('cent', '').ljust(2, '0'))
+        return int(match.group('euro')) * 100 + \
+            int(match.groupdict().get('cent', '').ljust(2, '0'))
     else:
         raise TypeError('Unknown price type: {0!r}'.format(variant))
 
 
 def buildPrices(data, roles=None, regex=default_price_regex,
                 default=None, additional={}):
-    ''' Create a dictionary with price information. Multiple ways are supported.
+    ''' Create a dictionary with price information. Multiple ways are
+        supported.
 
         :rtype: :obj:`dict`: keys are role as str, values are the prices as
              cent count'''
@@ -186,24 +190,26 @@ def buildLegend(legend=None, text=None, regex=None, key=lambda v: v):
     if legend is None:
         legend = {}
     if text is not None:
-        for match in re.finditer(regex or default_legend_regex, text, re.UNICODE):
+        for match in re.finditer(regex or default_legend_regex,
+                                 text, re.UNICODE):
             legend[key(match.group('name'))] = match.group('value').strip()
     return legend
 
 
 def extractNotes(name, notes, legend=None, regex=None, key=lambda v: v):
-    ''' This functions uses legend data to extract e.g. (1) references in a meal
-        name and add these in full text to the notes.
+    ''' This functions uses legend data to extract e.g. (1) references in a
+        meal name and add these in full text to the notes.
 
         :param str name: The meal name
         :param list notes: The initial list of notes for this meal
         :param dict legend: The legend data. Use `None` to skip extraction. The
             key is searched inside the meal name (with the given regex) and if
             found the value is added to the notes list.
-        :param re.compile regex: The regex to find legend references in the meal name. The
-            regex should have on group which identifies the key in the legend
-            data. If you pass None the :py:data:`default_extra_regex` is used.
-            Only compiled regex are supported.
+        :param re.compile regex: The regex to find legend references in the
+            meal name. The regex should have on group which identifies the key
+            in the legend data. If you pass None the
+            :py:data:`default_extra_regex` is used. Only compiled regex are
+            supported.
         :param callable key: function to map the key to a legend key
         :rtype: tuple with name and notes'''
     if legend is None:
@@ -253,10 +259,10 @@ class BaseBuilder(object):
 
             :param notes: List of notes
             :type notes: list
-            :param prices: Price of the meal; Every key must be a string for the
-                 role of the persons who can use this tariff; The value is the
-                 price in Euro Cents, The site of the OpenMensa project offers
-                 more detailed information.
+            :param prices: Price of the meal; Every key must be a string for
+                 the role of the persons who can use this tariff; The value is
+                 the price in Euro Cents, The site of the OpenMensa project
+                 offers more detailed information.
             :type prices: dict"""
         # ensure we have an entry for this date
         date = self._handleDate(date)
@@ -267,7 +273,7 @@ class BaseBuilder(object):
             self._days[date][category] = []
         # check name:
         if len(name) > 250:
-            raise ValueError('Meals names must be shorter than 251 characters!')
+            raise ValueError('Meal names must be shorter than 251 characters!')
         # add meal into category:
         self._days[date][category].append((name, notes or [], prices or {}))
 
@@ -308,10 +314,10 @@ class BaseBuilder(object):
 
     @staticmethod
     def _handleDate(date):
-        """ Internal method that is used to handle/convert input date. It raises
-            a :exc:`ValueError` if the type is no :class:`datetime.date`. This
-            method should be overwritten in subclasses to support other date
-            input types.
+        """ Internal method that is used to handle/convert input date. It
+            raises a :exc:`ValueError` if the type is no
+            :class:`datetime.date`. This method should be overwritten in
+            subclasses to support other date input types.
 
             :param date: input to be handled/converted
             :rtype: datetime.date"""
@@ -414,15 +420,15 @@ class BaseBuilder(object):
 
 
 class LazyBuilder(BaseBuilder):
-    """ An extended builder class which uses a set of helper and auto-converting
-        functions to reduce common converting tasks"""
+    """ An extended builder class which uses a set of helper and
+        auto-converting functions to reduce common converting tasks"""
 
     def __init__(self):
         super(LazyBuilder, self).__init__()
         self.legendData = None
         #: function passed as key parameter to :py:func:`.buildLegend` and
-        #: :py:func:`.extractNotes`; use `lambda v: v.lower()` for case-insensitive
-        #: legend names (instance member)
+        #: :py:func:`.extractNotes`; use `lambda v: v.lower()` for
+        #: case-insensitive legend names (instance member)
         self.legendKeyFunc = lambda v: v
         self.additionalCharges = (None, {})
 
@@ -442,15 +448,18 @@ class LazyBuilder(BaseBuilder):
                 roles (key)."""
         self.additionalCharges = (default, buildPrices(additional))
 
-    def addMeal(self, date, category, name, notes=None, prices=None, roles=None):
+    def addMeal(self, date, category, name, notes=None, prices=None,
+                roles=None):
         """ Same as :py:meth:`.BaseBuilder.addMeal` but uses
             helper functions to convert input parameters into needed types.
             Meals names are auto-shortend to the allowed 250 characters.
             The following paramer is new:
 
-            :param roles:  Is passed as role parameter to :func:`buildPrices`"""
+            :param roles:  Is passed as role parameter to :func:`buildPrices`
+            """
         if self.legendData:  # do legend extraction
-            name, notes = extractNotes(name, notes or [], legend=self.legendData,
+            name, notes = extractNotes(name, notes or [],
+                                       legend=self.legendData,
                                        key=self.legendKeyFunc)
         prices = buildPrices(prices or {}, roles,
                              default=self.additionalCharges[0],
