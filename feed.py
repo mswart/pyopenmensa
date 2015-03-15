@@ -108,9 +108,10 @@ default_price_regex = re.compile(r'(^|[^\d,.])(?P<euro>\d+)[,.]' +
                                  r'(?P<cent>\d{2}|\d{1}(?=\s*€))',
                                  re.UNICODE)
 short_price_regex = re.compile(r'[^\d]*(?P<euro>\d+)\s*€[^\d]*', re.UNICODE)
+none_price_regex = re.compile(r'^\s*-\s*$', re.UNICODE)
 
 
-def convertPrice(variant, regex=None, short_regex=None):
+def convertPrice(variant, regex=None, short_regex=None, none_regex=none_price_regex):
     ''' Helper function to convert the given input price into integers (cents
         count). :obj:`int`, :obj:`float` and :obj:`str` are supported
 
@@ -119,7 +120,10 @@ def convertPrice(variant, regex=None, short_regex=None):
              contain two named groups `euro` and `cent`
         :param re.compile short_regex: Short regex version (no cent part)
              group `euro` should contain a valid integer.
-        :rtype: int'''
+        :param re.compile none_regex: Regex to detect that no value is provided
+             if the input data is str, the normal regex do not match and this
+             regex matches `None` is returned.
+        :rtype: int/None'''
     if isinstance(variant, int) and not isinstance(variant, bool):
         return variant
     elif isinstance(variant, float):
@@ -128,6 +132,8 @@ def convertPrice(variant, regex=None, short_regex=None):
         match = (regex or default_price_regex).search(variant) \
             or (short_regex or short_price_regex).match(variant)
         if not match:
+            if none_regex and none_regex.match(variant):
+                return None
             raise ValueError('Could not extract price: {0}'.format(variant))
         return int(match.group('euro')) * 100 + \
             int(match.groupdict().get('cent', '').ljust(2, '0'))
@@ -143,22 +149,30 @@ def buildPrices(data, roles=None, regex=default_price_regex,
         :rtype: :obj:`dict`: keys are role as str, values are the prices as
              cent count'''
     if isinstance(data, dict):
-        return dict(map(lambda item: (item[0], convertPrice(item[1])),
-                        data.items()))
+        data = [(item[0], convertPrice(item[1])) for item in data.items()]
+        return dict([v for v in data if v[1] is not None])
     elif isinstance(data, (str, float, int)) and not isinstance(data, bool):
         if default is None:
             raise ValueError('You have to call setAdditionalCharges '
                              'before it is possible to pass a string as price')
-        price = convertPrice(data)
-        prices = {default: price}
+        basePrice = convertPrice(data)
+        if basePrice is None:
+            return {}
+        prices = {default: basePrice}
         for role in additional:
-            prices[role] = price + convertPrice(additional[role])
+            extraCharge = convertPrice(additional[role])
+            if extraCharge is None:
+                continue
+            prices[role] = basePrice + extraCharge
         return prices
     elif roles:
         prices = {}
         priceRoles = iter(roles)
-        for price in data:
-            prices[next(priceRoles)] = convertPrice(price)
+        for priceData in data:
+            price = convertPrice(priceData)
+            if price is None:
+                continue
+            prices[next(priceRoles)] = price
         return prices
     else:
         raise TypeError('This type is for prices not supported!')

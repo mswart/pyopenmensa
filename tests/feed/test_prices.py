@@ -1,5 +1,6 @@
 # -*- coding: UTF-8 -*-
 import pytest
+import re
 
 from pyopenmensa.feed import convertPrice, buildPrices
 
@@ -44,6 +45,20 @@ class TestPriceConverting():
         assert convertPrice(3.65) == 365
         assert convertPrice(3.61234) == 361
         assert convertPrice(13.25534) == 1326
+
+    def test_none_detected(self):
+        assert convertPrice('-') is None
+        assert convertPrice(' -   ') is None
+
+    def test_deactived_none_detected(self):
+        with pytest.raises(ValueError):
+            convertPrice('-', none_regex=None)
+        with pytest.raises(ValueError):
+            convertPrice(' -   ', none_regex=None)
+
+    def test_custom_none_detected(self):
+        convertPrice('Keine Ahnung', none_regex=re.compile(r'[Kk]eine.*')) is None
+        convertPrice('Keine Idee', none_regex=re.compile(r'[Kk]eine.*')) is None
 
     def test_custom_str2price_convert(self):
         class CustomStr(str): pass
@@ -107,6 +122,20 @@ class TestPriceDictBuilding():
         d = {'student': '3.64 €', 'employee': 3.84, 'others': 414}
         assert buildPrices(d) == self.price_example
 
+    def test_dict_converting_with_none_clearing(self):
+        d = {
+            'student': '-',
+            'other': 375
+        }
+        assert buildPrices(d) == {'other': 375}
+
+    def test_dict_converting_with_complete_none_clearing(self):
+        d = {
+            'student': '-',
+            'other': '  -   '
+        }
+        assert buildPrices(d) == {}
+
     def test_build_from_prices_and_roles(self):
         assert buildPrices(
             ['3.64€', 3.84, 414],
@@ -123,12 +152,38 @@ class TestPriceDictBuilding():
             ('student', 'employee', 'others')
         ) == self.price_example
 
+    def test_build_from_prices_and_roles_with_none_clearing(self):
+        assert buildPrices(
+            ['3.64€', '-', '  -   '],
+            ('student', 'employee', 'others')
+        ) == self.single_price_example
+
+    def test_build_from_prices_and_roles_with_complete_none_clearing(self):
+        assert buildPrices(
+            ['-', '-', '  -   '],
+            ('student', 'employee', 'others')
+        ) == {}
+
     def test_addtional_charges(self):
         assert buildPrices(
             3.64,
             default='student',
             additional={'employee': '0.20€', 'others': 50}
         ) == self.price_example
+
+    def test_addtional_charges_with_none_clearing(self):
+        assert buildPrices(
+            '-',
+            default='student',
+            additional={'employee': '0.20€', 'others': 50}
+        ) == {}
+
+    def test_addtional_charges_with_none_clearing2(self):
+        assert buildPrices(
+            364,
+            default='student',
+            additional={'employee': '-', 'others': 50}
+        ) == {'student': 364, 'others': 414}
 
     def test_build_from_custom_str_subtype(self):
         class CustomStr(str): pass
