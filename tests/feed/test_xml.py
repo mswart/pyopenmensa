@@ -58,8 +58,8 @@ def test_canteen_element(canteen):
 def test_feed_without_version(canteen):
     canteen.set_version(None)
     parsed = parse(canteen.toXMLFeed())
-    with pytest.raises(KeyError):
-        version = find_child(parsed, 'version')
+    get_version = lambda: find_child(parsed, 'version')
+    pytest.raises(KeyError, get_version)
 
 
 def test_closed_day(canteen):
