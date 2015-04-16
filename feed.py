@@ -257,8 +257,18 @@ class BaseBuilder(object):
         OpenMensa v2 xml feed string. """
     allowed_price_roles = ['pupil', 'student', 'employee', 'other']
 
-    def __init__(self):
+    def __init__(self, version=None):
         self._days = {}
+        self.version = None
+
+        if version is not None:
+            self.set_version(version)
+
+    def get_version(self):
+        return self.version
+
+    def set_version(self, version):
+        self.version = version
 
     def addMeal(self, date, category, name, notes=None, prices=None):
         """ This is the main helper, it adds a meal to the
@@ -353,13 +363,24 @@ class BaseBuilder(object):
 
     # methods to create feed
     # ----------------------
+
+    def toXML(self):
+        feed, document = self._createDocument()
+
+        if self.version is not None:
+            feed.appendChild(self._buildVersionTag(self.version, document))
+
+        feed.appendChild(self.toTag(document))
+
+        return feed
+
     def toXMLFeed(self):
         """ Convert this cateen information into string
             which is a valid OpenMensa v2 xml feed
 
             :rtype: str"""
-        feed, document = self._createDocument()
-        feed.appendChild(self.toTag(document))
+        feed = self.toXML()
+
         xml_header = '<?xml version="1.0" encoding="UTF-8"?>\n'
         return xml_header + feed.toprettyxml(indent='  ')
 
@@ -369,13 +390,14 @@ class BaseBuilder(object):
         output = Document()
         # build main openmensa element with correct xml namespaces
         openmensa = output.createElement('openmensa')
-        openmensa.setAttribute('version', '2.0')
+        openmensa.setAttribute('version', '2.1')
         openmensa.setAttribute('xmlns', 'http://openmensa.org/open-mensa-v2')
         openmensa.setAttribute('xmlns:xsi',
                                'http://www.w3.org/2001/XMLSchema-instance')
         openmensa.setAttribute('xsi:schemaLocation',
                                'http://openmensa.org/open-mensa-v2 ' +
                                'http://openmensa.org/open-mensa-v2.xsd')
+
         return openmensa, output
 
     def toTag(self, output):
@@ -405,6 +427,12 @@ class BaseBuilder(object):
                     categoryname, self._days[date][categoryname], output))
             canteen.appendChild(day)
         return canteen
+
+    @classmethod
+    def _buildVersionTag(cls, versionStr, output):
+        version = output.createElement('version')
+        version.appendChild(output.createTextNode(versionStr))
+        return version
 
     @classmethod
     def _buildCategoryTag(cls, name, data, output):
@@ -449,8 +477,8 @@ class LazyBuilder(BaseBuilder):
     """ An extended builder class which uses a set of helper and
         auto-converting functions to reduce common converting tasks"""
 
-    def __init__(self):
-        super(LazyBuilder, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(LazyBuilder, self).__init__(*args, **kwargs)
         self.legendData = None
         #: function passed as key parameter to :py:func:`.buildLegend` and
         #: :py:func:`.extractNotes`; use `lambda v: v.lower()` for
