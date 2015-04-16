@@ -26,7 +26,10 @@ def tag(name):
 
 def find_child(parsed, tag_name, is_openmensa_tag=True):
     tag_name = tag_name if not is_openmensa_tag else tag(tag_name)
-    return parsed.find("./{}".format(tag_name))
+    element = parsed.find("./{}".format(tag_name))
+    if element is None:
+        raise KeyError("Element named {!r} not found.".format(tag_name))
+    return element
 
 
 def test_xml_header(canteen):
@@ -50,6 +53,13 @@ def test_canteen_element(canteen):
     assert canteen.tag == tag('canteen')
     assert len(canteen.attrib.keys()) == 0
     assert version.text == PARSER_VERSION
+
+
+def test_feed_without_version(canteen):
+    canteen.set_version(None)
+    parsed = parse(canteen.toXMLFeed())
+    with pytest.raises(KeyError):
+        version = find_child(parsed, 'version')
 
 
 def test_closed_day(canteen):
