@@ -295,6 +295,7 @@ class BaseBuilder(object):
     def __init__(self, version=None):
         self._days = {}
         self.version = None
+        self._name = None
         self._address = None
         self._city = None
         self._phone = None
@@ -311,6 +312,14 @@ class BaseBuilder(object):
 
     def set_version(self, version):
         self.version = version
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        self._name = name
 
     @property
     def address(self):
@@ -500,6 +509,8 @@ class BaseBuilder(object):
         '''
         # create canteen tag, which represents our data
         canteen = output.createElement('canteen')
+        if self._name is not None:
+            canteen.appendChild(self._buildStringTag('name', self._name, output))
         if self._address is not None:
             canteen.appendChild(self._buildStringTag('address', self._address, output))
         if self._city is not None:
