@@ -107,6 +107,6 @@ details.
     :target: https://travis-ci.org/mswart/pyopenmensa
     :alt: Build Status
 
-.. |Latest PyPI version| image:: https://pypip.in/v/pyopenmensa/badge.png
-    :target: https://crate.io/packages/pyopenmensa/
+.. |Latest PyPI version| image:: https://badge.fury.io/py/pyopenmensa.png
+    :target: https://badge.fury.io/py/pyopenmensa
     :alt: Latest PyPI version
