@@ -40,6 +40,12 @@ def test_to_long_meal_name(canteen):
         canteen.addMeal(day, 'Hauptgericht', 'Y'*251)
 
 
+def test_to_empty_meal_name(canteen):
+    day = date(2013, 3, 7)
+    with pytest.raises(ValueError):
+        canteen.addMeal(day, 'Hauptgericht', '')
+
+
 def test_known_price_roles(canteen):
     day = date(2013, 3, 7)
     prices = {

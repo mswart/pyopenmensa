@@ -268,7 +268,7 @@ class BaseBuilder(object):
             :param str category:  Name of the meal category
             :param str meal: Meal name.
 
-            :raises ValueError: if the meal name is long that 250 characters!
+            :raises ValueError: if the meal name is empty or longer that 250 characters
             :raises ValueError: if the price role is unknown
             :raises TypeError: if the price value is not an integer
 
@@ -289,8 +289,10 @@ class BaseBuilder(object):
         if category not in self._days[date]:
             self._days[date][category] = []
         # check name:
+        if not len(name):
+            raise ValueError('Meal names must not be empty')
         if len(name) > 250:
-            raise ValueError('Meal names must be shorter than 251 characters!')
+            raise ValueError('Meal names must be shorter than 251 characters')
         # process prices:
         if prices is None:
             prices = {}
