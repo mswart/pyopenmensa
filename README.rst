@@ -1,7 +1,7 @@
 PyOpenMensa - use OpenMensa with Python
 =======================================
 
-|Build Status| |Latest PyPI version|
+|Build Status| |Latest PyPI version| |Python versions| |Development status| |Documentation|
 
 This small python library helps you to work with
 `OpenMensa <http://openmensa.org/>`__ by:
@@ -11,12 +11,16 @@ This small python library helps you to work with
 
 More information about `OpenMensa and all possibilities for developers <http://doc.openmensa.org/>`__.
 
+
 Documentation
 -------------
 
-**See http://pyom.devtation.de/ for the `Full documentation about PyOpenMensa <http://pyom.devtation.de/>`__ **
+|Documentation|
+
+Documentation is hosted by `ReadTheDocs <https://readthedocs.org>`__: for the `Full documentation about PyOpenMensa <https://pyopenmensa.readthedocs.org>`__
 
 The documentation is created with `Spinx <http://sphinx-doc.org/>`__ and the documentation source code can be found in the doc/ directory.
+
 
 tldr: Documentation
 -------------------
@@ -85,6 +89,7 @@ tldr: Documentation
         </canteen>
       </openmensa>
 
+
 Contributing
 ------------
 
@@ -95,18 +100,31 @@ Contributing
 5. Open a `Pull Request <https://github.com/mswart/pyopenmensa/pulls>`__
 6. Enjoy a refreshing Diet Coke and wait
 
+
 License
 -------
 
 LGPL License
 
-Copyright (c) 2012-2014 Malte Swart. LGPL license, see LICENSE for more
+Copyright (c) 2012-2015 Malte Swart. LGPL license, see LICENSE for more
 details.
 
 .. |Build Status| image:: https://travis-ci.org/mswart/pyopenmensa.png?branch=master
     :target: https://travis-ci.org/mswart/pyopenmensa
     :alt: Build Status
 
-.. |Latest PyPI version| image:: https://badge.fury.io/py/pyopenmensa.png
-    :target: https://badge.fury.io/py/pyopenmensa
+.. |Latest PyPI version| image:: https://img.shields.io/pypi/v/pyopenmensa.svg
+    :target: https://pypi.python.org/pypi/pyopenmensa
     :alt: Latest PyPI version
+
+.. |Python versions| image:: https://img.shields.io/pypi/pyversions/pyopenmensa.svg
+    :target: https://pypi.python.org/pypi/pyopenmensa
+    :alt: Supported Python Versions
+
+.. |Development status| image:: https://img.shields.io/pypi/status/pyopenmensa.svg
+    :target: https://pypi.python.org/pypi/pyopenmensa
+    :alt: Development status
+
+.. |Documentation| image:: https://readthedocs.org/projects/pyopenmensa/badge/?version=latest
+    :target: https://pyopenmensa.readthedocs.org/en/latest/?badge=latest
+    :alt: Documentation
