@@ -38,12 +38,14 @@ def test_to_long_meal_name(canteen):
     day = date(2013, 3, 7)
     with pytest.raises(ValueError):
         canteen.addMeal(day, 'Hauptgericht', 'Y'*251)
+    assert canteen.dayCount() == 0
 
 
 def test_to_empty_meal_name(canteen):
     day = date(2013, 3, 7)
     with pytest.raises(ValueError):
         canteen.addMeal(day, 'Hauptgericht', '')
+    assert canteen.dayCount() == 0
 
 
 def test_known_price_roles(canteen):
@@ -63,6 +65,7 @@ def test_exception_on_unknown_price_role(canteen):
     day = date(2013, 3, 7)
     with pytest.raises(ValueError):
         canteen.addMeal(day, 'Hauptgericht', 'Essen', [], {'foobar': 12})
+    assert canteen.dayCount() == 0
 
 
 def test_expection_on_wrong_price_type(canteen):
@@ -72,6 +75,7 @@ def test_expection_on_wrong_price_type(canteen):
         with pytest.raises(TypeError):
             canteen.addMeal(day, 'Hauptgericht', 'Essen', [],
                             {'student': value})
+    assert canteen.dayCount() == 0
 
 
 def test_support_of_custom_integers_as_price_value(canteen):
