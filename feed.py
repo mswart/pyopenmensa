@@ -388,13 +388,6 @@ class BaseBuilder(object):
                  the price in Euro Cents, The site of the OpenMensa project
                  offers more detailed information.
             :type prices: dict"""
-        # ensure we have an entry for this date
-        date = self._handleDate(date)
-        if date not in self._days:
-            self._days[date] = OrderedDict()
-        # ensure we have a category element for this category
-        if category not in self._days[date]:
-            self._days[date][category] = []
         # check name:
         if not len(name):
             raise ValueError('Meal names must not be empty')
@@ -409,6 +402,13 @@ class BaseBuilder(object):
                     raise ValueError('Unknown price role "%s"' % role)
                 if not isinstance(prices[role], int):
                     raise TypeError('Unsupport price type - expect integer')
+        # ensure we have an entry for this date
+        date = self._handleDate(date)
+        if date not in self._days:
+            self._days[date] = OrderedDict()
+        # ensure we have a category element for this category
+        if category not in self._days[date]:
+            self._days[date][category] = []
         # add meal into category:
         self._days[date][category].append((name, notes or [], prices))
 
