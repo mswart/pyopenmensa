@@ -377,6 +377,8 @@ class BaseBuilder(object):
 
             :raises ValueError: if the meal name is empty or longer that 250 characters
             :raises ValueError: if the price role is unknown
+            :raises ValueError: if the category name is empty
+            :raises ValueError: if note list contains empty note
             :raises TypeError: if the price value is not an integer
 
             Additional the following data are also supported:
@@ -393,6 +395,14 @@ class BaseBuilder(object):
             raise ValueError('Meal names must not be empty')
         if len(name) > 250:
             raise ValueError('Meal names must be shorter than 251 characters')
+        # check category:
+        if not len(category):
+            raise ValueError('Category names must not be empty')
+        # process notes
+        if notes:
+            for note in notes:
+                if not len(note):
+                    raise ValueError('Note must not be empty. Left it out, if not needed')
         # process prices:
         if prices is None:
             prices = {}

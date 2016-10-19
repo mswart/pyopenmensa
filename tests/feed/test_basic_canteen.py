@@ -47,17 +47,33 @@ def test_add_meal(canteen):
     assert canteen.hasMealsFor(day)
 
 
-def test_to_long_meal_name(canteen):
+def test_too_long_meal_name(canteen):
     day = date(2013, 3, 7)
     with pytest.raises(ValueError):
         canteen.addMeal(day, 'Hauptgericht', 'Y'*251)
     assert canteen.dayCount() == 0
 
 
-def test_to_empty_meal_name(canteen):
+def test_empty_meal_name(canteen):
     day = date(2013, 3, 7)
     with pytest.raises(ValueError):
         canteen.addMeal(day, 'Hauptgericht', '')
+    assert canteen.dayCount() == 0
+
+
+def test_empty_category_name(canteen):
+    day = date(2013, 3, 7)
+    with pytest.raises(ValueError):
+        canteen.addMeal(day, '', 'Hunger!')
+    assert canteen.dayCount() == 0
+
+
+def test_empty_note(canteen):
+    day = date(2013, 3, 7)
+    with pytest.raises(ValueError):
+        canteen.addMeal(day, 'Hauptegericht', 'Hunger!', [''])
+    with pytest.raises(ValueError):
+        canteen.addMeal(day, 'Hauptegericht', 'Hunger!', ['Otto', ''])
     assert canteen.dayCount() == 0
 
 
