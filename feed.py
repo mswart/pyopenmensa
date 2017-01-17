@@ -2,6 +2,7 @@
 import re
 from xml.dom.minidom import Document
 import datetime
+from collections import namedtuple
 try:
     from collections import OrderedDict
 except ImportError:  # support python 2.6
@@ -245,6 +246,40 @@ def extractNotes(name, notes, legend=None, regex=None, key=lambda v: v):
     return name, notes
 
 
+class Feed(namedtuple('FeedRecord', ['name', 'priority', 'url', 'source', 'dayOfWeek', 'dayOfMonth', 'hour', 'minute', 'retry'])):
+    def toTag(self, output):
+        ''' This methods returns all data of this feed as feed xml tag
+
+        :param output: XML Document to which the data should be added
+        :type output: xml.dom.DOMImplementation.createDocument
+        '''
+        feed = output.createElement('feed')
+        feed.setAttribute('name', self.name)
+        feed.setAttribute('priority', str(self.priority))
+
+        # schedule
+        schedule = output.createElement('schedule')
+        schedule.setAttribute('dayOfMonth', self.dayOfMonth)
+        schedule.setAttribute('dayOfWeek', self.dayOfWeek)
+        schedule.setAttribute('hour', self.hour)
+        schedule.setAttribute('minute', self.minute)
+        if self.retry:
+            schedule.setAttribute('retry', self.retry)
+        feed.appendChild(schedule)
+
+        # url
+        url = output.createElement('url')
+        url.appendChild(output.createTextNode(self.url))
+        feed.appendChild(url)
+
+        # source
+        if self.source:
+            source = output.createElement('source')
+            source.appendChild(output.createTextNode(self.source))
+            feed.appendChild(source)
+        return feed
+
+
 # Base canteen with meal data
 # ---------------------------
 
@@ -257,8 +292,82 @@ class BaseBuilder(object):
         OpenMensa v2 xml feed string. """
     allowed_price_roles = ['pupil', 'student', 'employee', 'other']
 
-    def __init__(self):
+    def __init__(self, version=None):
         self._days = {}
+        self._version = None
+        self._name = None
+        self._address = None
+        self._city = None
+        self._phone = None
+        self._email = None
+        self._location = None
+        self._availability = None
+        self.feeds = []
+
+        if version is not None:
+            self.set_version(version)
+
+    @property
+    def version(self):
+        return self._version
+
+    @version.setter
+    def version(self, version):
+        self._version = version
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        self._name = name
+
+    @property
+    def address(self):
+        return self._address
+
+    @address.setter
+    def address(self, address):
+        self._address = address
+
+    @property
+    def city(self):
+        return self._city
+
+    @city.setter
+    def city(self, city):
+        self._city = city
+
+    @property
+    def phone(self):
+        return self._phone
+
+    @phone.setter
+    def phone(self, phone):
+        self._phone = phone
+
+    @property
+    def email(self):
+        return self._email
+
+    @email.setter
+    def email(self, email):
+        self._email = email
+
+    def location(self, longitude, latitude):
+        self._location = (longitude, latitude)
+
+    @property
+    def availability(self):
+        return self._availability
+
+    @availability.setter
+    def availability(self, availability):
+        self._availability = availability
+
+    def define(self, **kwargs):
+        self.feeds.append(Feed(**kwargs))
 
     def addMeal(self, date, category, name, notes=None, prices=None):
         """ This is the main helper, it adds a meal to the
@@ -365,13 +474,24 @@ class BaseBuilder(object):
 
     # methods to create feed
     # ----------------------
+
+    def toXML(self):
+        feed, document = self._createDocument()
+
+        if self.version is not None:
+            feed.appendChild(self._buildStringTag('version', self.version, document))
+
+        feed.appendChild(self.toTag(document))
+
+        return feed
+
     def toXMLFeed(self):
         """ Convert this cateen information into string
             which is a valid OpenMensa v2 xml feed
 
             :rtype: str"""
-        feed, document = self._createDocument()
-        feed.appendChild(self.toTag(document))
+        feed = self.toXML()
+
         xml_header = '<?xml version="1.0" encoding="UTF-8"?>\n'
         return xml_header + feed.toprettyxml(indent='  ')
 
@@ -381,13 +501,14 @@ class BaseBuilder(object):
         output = Document()
         # build main openmensa element with correct xml namespaces
         openmensa = output.createElement('openmensa')
-        openmensa.setAttribute('version', '2.0')
+        openmensa.setAttribute('version', '2.1')
         openmensa.setAttribute('xmlns', 'http://openmensa.org/open-mensa-v2')
         openmensa.setAttribute('xmlns:xsi',
                                'http://www.w3.org/2001/XMLSchema-instance')
         openmensa.setAttribute('xsi:schemaLocation',
                                'http://openmensa.org/open-mensa-v2 ' +
                                'http://openmensa.org/open-mensa-v2.xsd')
+
         return openmensa, output
 
     def toTag(self, output):
@@ -402,6 +523,23 @@ class BaseBuilder(object):
         '''
         # create canteen tag, which represents our data
         canteen = output.createElement('canteen')
+        if self._name is not None:
+            canteen.appendChild(self._buildStringTag('name', self._name, output))
+        if self._address is not None:
+            canteen.appendChild(self._buildStringTag('address', self._address, output))
+        if self._city is not None:
+            canteen.appendChild(self._buildStringTag('city', self._city, output))
+        if self._phone is not None:
+            canteen.appendChild(self._buildStringTag('phone', self._phone, output))
+        if self._email is not None:
+            canteen.appendChild(self._buildStringTag('email', self._email, output))
+        if self._location is not None:
+            canteen.appendChild(self._buildLocationTag(self._location, output))
+        if self._availability is not None:
+            canteen.appendChild(self._buildStringTag('availability', self._availability, output))
+        # iterate above all feeds:
+        for feed in sorted(self.feeds, key=lambda v: v.priority):
+            canteen.appendChild(feed.toTag(output))
         # iterate above all days (sorted):
         for date in sorted(self._days.keys()):
             day = output.createElement('day')
@@ -417,6 +555,19 @@ class BaseBuilder(object):
                     categoryname, self._days[date][categoryname], output))
             canteen.appendChild(day)
         return canteen
+
+    @classmethod
+    def _buildStringTag(cls, tag_name, value, output):
+        tag = output.createElement(tag_name)
+        tag.appendChild(output.createTextNode(value))
+        return tag
+
+    @classmethod
+    def _buildLocationTag(cls, location, output):
+        tag = output.createElement('location')
+        tag.setAttribute('longitude', location[0])
+        tag.setAttribute('latitude', location[1])
+        return tag
 
     @classmethod
     def _buildCategoryTag(cls, name, data, output):
@@ -465,8 +616,8 @@ class LazyBuilder(BaseBuilder):
             to use default regex provided by this module.
         """
 
-    def __init__(self):
-        super(LazyBuilder, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(LazyBuilder, self).__init__(*args, **kwargs)
         self.legendData = None
         #: function passed as key parameter to :py:func:`.buildLegend` and
         #: :py:func:`.extractNotes`; use `lambda v: v.lower()` for

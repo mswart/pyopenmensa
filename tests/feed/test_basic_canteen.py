@@ -6,8 +6,21 @@ from pyopenmensa.feed import BaseBuilder
 
 
 @pytest.fixture
+def canteen_version():
+    return "1.0.3a"
+
+
+@pytest.fixture
 def canteen():
     return BaseBuilder()
+
+
+def test_version(canteen, canteen_version):
+    assert canteen.version is None
+    canteen.version = canteen_version
+    assert canteen.version == canteen_version
+    canteen.version = None
+    assert canteen.version is None
 
 
 def test_day_count(canteen):
