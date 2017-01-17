@@ -16,7 +16,7 @@ def canteen(request):
     else:
         builder = LazyBuilder()
 
-    builder.set_version(PARSER_VERSION)
+    builder.version = PARSER_VERSION
     return builder
 
 
@@ -56,7 +56,7 @@ def test_canteen_element(canteen):
 
 
 def test_feed_without_version(canteen):
-    canteen.set_version(None)
+    canteen.version = None
     parsed = parse(canteen.toXMLFeed())
     with pytest.raises(KeyError):
         version = find_child(parsed, 'version')
