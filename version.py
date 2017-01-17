@@ -1,5 +1,5 @@
 MAJOR = 0
-MINOR = 93
+MINOR = 94
 PATCH = 0
 STAGE = None
 
