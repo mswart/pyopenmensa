@@ -220,8 +220,8 @@ def extractNotes(name, notes, legend=None, regex=None, key=lambda v: v):
             key is searched inside the meal name (with the given regex) and if
             found the value is added to the notes list.
         :param re.compile regex: The regex to find legend references in the
-            meal name. The regex should have on group which identifies the key
-            in the legend data. If you pass None the
+            meal name. The regex must have exactly one group which identifies
+            the key in the legend data. If you pass None the
             :py:data:`default_extra_regex` is used. Only compiled regex are
             supported.
         :param callable key: function to map the key to a legend key
@@ -459,7 +459,11 @@ class BaseBuilder(object):
 
 class LazyBuilder(BaseBuilder):
     """ An extended builder class which uses a set of helper and
-        auto-converting functions to reduce common converting tasks"""
+        auto-converting functions to reduce common converting tasks
+
+        :ivar extra_regex: None: regex to be passed to extractNotes, Use `None`
+            to use default regex provided by this module.
+        """
 
     def __init__(self):
         super(LazyBuilder, self).__init__()
@@ -468,6 +472,7 @@ class LazyBuilder(BaseBuilder):
         #: :py:func:`.extractNotes`; use `lambda v: v.lower()` for
         #: case-insensitive legend names (instance member)
         self.legendKeyFunc = lambda v: v
+        self.extra_regex = None
         self.additionalCharges = (None, {})
 
     def setLegendData(self, *args, **kwargs):
@@ -498,7 +503,8 @@ class LazyBuilder(BaseBuilder):
         if self.legendData:  # do legend extraction
             name, notes = extractNotes(name, notes or [],
                                        legend=self.legendData,
-                                       key=self.legendKeyFunc)
+                                       key=self.legendKeyFunc,
+                                       regex=self.extra_regex)
         prices = buildPrices(prices or {}, roles,
                              default=self.additionalCharges[0],
                              additional=self.additionalCharges[1])

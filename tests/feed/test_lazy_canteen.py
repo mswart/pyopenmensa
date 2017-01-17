@@ -1,6 +1,8 @@
 # -*- coding: UTF-8 -*-
-import pytest
 from datetime import date
+import re
+
+import pytest
 
 from pyopenmensa.feed import LazyBuilder
 
@@ -48,3 +50,11 @@ def test_caseinsensitive_notes(canteen):
     canteen.setLegendData(legend={'f': 'Note'})
     canteen.addMeal(day, 'Test', 'Essen(F)')
     assert canteen._days[day]['Test'][0] == ('Essen', ['Note'], {})
+
+
+def test_notes_regex(canteen):
+    day = date(2013, 3, 7)
+    canteen.extra_regex = re.compile('_([0-9]{1,3})_(?:: +)?', re.UNICODE)
+    canteen.setLegendData(legend={'2': 'Found Note'})
+    canteen.addMeal(day, 'Test', '_2_: Essen _a_, _2,2_, (2)')
+    assert canteen._days[day]['Test'][0] == ('Essen _a_, _2,2_, (2)', ['Found Note'], {})
