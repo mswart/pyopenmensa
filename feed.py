@@ -294,7 +294,7 @@ class BaseBuilder(object):
 
     def __init__(self, version=None):
         self._days = {}
-        self._version = None
+        self._version = version
         self._name = None
         self._address = None
         self._city = None
@@ -303,9 +303,6 @@ class BaseBuilder(object):
         self._location = None
         self._availability = None
         self.feeds = []
-
-        if version is not None:
-            self.set_version(version)
 
     @property
     def version(self):
