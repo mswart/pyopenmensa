@@ -548,8 +548,10 @@ class BaseBuilder(object):
                 continue
             # canteen is open
             for categoryname in self._days[date]:
-                day.appendChild(self._buildCategoryTag(
-                    categoryname, self._days[date][categoryname], output))
+                categoryTag = self._buildCategoryTag(
+                    categoryname, self._days[date][categoryname], output)
+                if categoryTag:
+                    day.appendChild(categoryTag)
             canteen.appendChild(day)
         return canteen
 
