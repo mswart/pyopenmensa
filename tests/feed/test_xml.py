@@ -1,10 +1,10 @@
 # -*- coding: UTF-8 -*-
 from datetime import date
-import pytest
 from xml.etree.ElementTree import fromstring as parse
 
-from pyopenmensa.feed import BaseBuilder, LazyBuilder
+import pytest
 
+from pyopenmensa.feed import BaseBuilder, LazyBuilder
 
 PARSER_VERSION = "1.0.3a"
 
@@ -42,7 +42,8 @@ def test_root_element(canteen):
     assert parsed.tag == tag('openmensa')
     assert parsed.attrib['version'] == '2.1'
     sL = '{http://www.w3.org/2001/XMLSchema-instance}schemaLocation'
-    assert parsed.attrib[sL] == 'http://openmensa.org/open-mensa-v2 http://openmensa.org/open-mensa-v2.xsd'
+    assert parsed.attrib[
+               sL] == 'http://openmensa.org/open-mensa-v2 http://openmensa.org/open-mensa-v2.xsd'
 
 
 def test_canteen_element(canteen):
@@ -145,7 +146,23 @@ def test_notes(canteen):
     for element in meal:
         if element.tag == tag('note'):
             xml_notes.append(element.text.strip())
-    assert xml_notes == notes
+    assert sorted(xml_notes) == sorted(notes)
+
+
+def test_notes_are_alphabetically_ordered(canteen):
+    notes = ['vegan', 'Schwein', 'glutenfrei']
+    canteen.addMeal(date(2013, 10, 13), 'Hauptgerichte', 'Gulasch', notes)
+    parsed = parse(canteen.toXMLFeed())
+
+    canteen_xml = find_child(parsed, 'canteen')
+    meal = canteen_xml[0][0][0]
+    assert len(meal) == 1 + len(notes)
+    xml_notes = []
+    for element in meal:
+        if element.tag == tag('note'):
+            xml_notes.append(element.text.strip())
+
+    assert xml_notes == sorted(notes)
 
 
 def test_prices(canteen):
@@ -162,3 +179,20 @@ def test_prices(canteen):
             assert list(element.attrib.keys()) == ['role']
             xml_prices[element.attrib['role']] = element.text.strip()
     assert xml_prices == prices_output
+
+
+def test_prices_are_alphabetically_ordered(canteen):
+    prices_input = {'student': 940, 'other': 9}
+    canteen.addMeal(date(2013, 10, 13), 'Hauptgerichte', 'Gulasch', prices=prices_input)
+
+    parsed = parse(canteen.toXMLFeed())
+    canteen = find_child(parsed, 'canteen')
+    meal = canteen[0][0][0]
+
+    assert len(meal) == 1 + len(prices_input)
+    xml_prices = []
+    for element in meal:
+        if element.tag == tag('price'):
+            assert list(element.attrib.keys()) == ['role']
+            xml_prices.append((element.attrib['role'], element.text.strip()))
+    assert xml_prices == [('other', '0.09'), ('student', '9.40')]

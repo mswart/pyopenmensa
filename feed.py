@@ -1,8 +1,9 @@
 # -*- coding: UTF-8 -*-
+from collections import namedtuple
+import datetime
 import re
 from xml.dom.minidom import Document
-import datetime
-from collections import namedtuple
+
 try:
     from collections import OrderedDict
 except ImportError:  # support python 2.6
@@ -586,12 +587,12 @@ class BaseBuilder(object):
         nametag.appendChild(output.createTextNode(name))
         meal.appendChild(nametag)
         # add notes:
-        for note in notes:
+        for note in sorted(notes):
             notetag = output.createElement('note')
             notetag.appendChild(output.createTextNode(note))
             meal.appendChild(notetag)
         # add prices:
-        for role in prices:
+        for role in sorted(prices):
             price = output.createElement('price')
             price.setAttribute('role', role)
             price.appendChild(output.createTextNode("{euros}.{cents:0>2}"
