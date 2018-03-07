@@ -1,6 +1,7 @@
-from setuptools import setup  # Always prefer setuptools over distutils
 from codecs import open  # To use a consistent encoding
 from os import path
+
+from setuptools import setup  # Always prefer setuptools over distutils
 
 here = path.abspath(path.dirname(__file__))
 
@@ -58,5 +59,7 @@ setup(
     keywords='openmensa feed framework',
 
     package_dir={'pyopenmensa': ''},
-    packages=['pyopenmensa'],
+    packages=['pyopenmensa', 'model'],
+
+    include_package_data=True,
 )
