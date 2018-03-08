@@ -49,11 +49,11 @@ def extractDate(text):
         return text
     match = date_format.search(text.lower())
     if not match:
-        raise ValueError('unsupported date format: {0}'.format(text.lower()))
+        raise ValueError('unsupported date format: {}'.format(text.lower()))
     # convert DD.MM.YYYY into YYYY-MM-DD
     if match.group('month'):
         if not match.group('month') in month_names:
-            raise ValueError('unknown month names: "{0}"'
+            raise ValueError('unknown month names: "{}"'
                              .format(match.group('month')))
         year = int(match.group('year'))
         return datetime.date(
@@ -131,7 +131,7 @@ def convertPrice(variant, regex=None, short_regex=None, none_regex=none_price_re
         if not match:
             if none_regex and none_regex.match(variant):
                 return None
-            raise ValueError('Could not extract price: {0}'.format(variant))
+            raise ValueError('Could not extract price: {}'.format(variant))
         return int(match.group('euro')) * 100 + \
             int(match.groupdict().get('cent', '').ljust(2, '0'))
     else:
@@ -236,7 +236,7 @@ def extractNotes(name, notes, legend=None, regex=None, key=lambda v: v):
             if legend[note] not in notes:
                 notes.append(legend[note])
         else:
-            print('could not find extra note "{0}"'.format(note))
+            print('could not find extra note "{}"'.format(note))
     # from notes from name
     name = regex.sub('', name).replace('\xa0', ' ').replace('  ', ' ').strip()
     return name, notes
