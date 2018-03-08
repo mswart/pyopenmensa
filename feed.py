@@ -1,13 +1,8 @@
 # -*- coding: UTF-8 -*-
-from collections import namedtuple
+from collections import namedtuple, OrderedDict
 import datetime
 import re
 from xml.dom.minidom import Document
-
-try:
-    from collections import OrderedDict
-except ImportError:  # support python 2.6
-    OrderedDict = dict
 
 
 # Helpers to extract dates from strings

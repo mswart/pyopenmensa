@@ -25,7 +25,7 @@ The documentation is created with `Spinx <http://sphinx-doc.org/>`__ and the doc
 tldr: Documentation
 -------------------
 
-1. You need `Python <http://www.python.org/>`__ 2.6, 2.7 or **>=3.2**.
+1. You need `Python <http://www.python.org/>`__ 2.7 or **>=3.2**.
 2. Install pyopenmensa:
 
    1. via pypi
