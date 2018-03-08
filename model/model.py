@@ -209,7 +209,7 @@ class Prices:
             if amount is not None:
                 price_element = ET.Element('price')
                 price_format = "{:0,.2f}"
-                price_element.text = price_format.format(amount / 100)
+                price_element.text = price_format.format(amount / 100.)
                 price_element.set('role', role)
 
                 price_elements.append(price_element)
