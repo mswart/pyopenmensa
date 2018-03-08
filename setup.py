@@ -62,4 +62,10 @@ setup(
     packages=['pyopenmensa', 'model'],
 
     include_package_data=True,
+    install_requires=[
+        'lxml',
+    ],
+    test_requires=[
+        'pytest'
+    ]
 )
