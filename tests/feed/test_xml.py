@@ -28,7 +28,7 @@ def find_child(parsed, tag_name, is_openmensa_tag=True):
     tag_name = tag_name if not is_openmensa_tag else tag(tag_name)
     element = parsed.find("./{}".format(tag_name))
     if element is None:
-        raise KeyError("Element named {0!r} not found.".format(tag_name))
+        raise KeyError("Element named {!r} not found.".format(tag_name))
     return element
 
 
