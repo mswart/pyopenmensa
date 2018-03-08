@@ -1,5 +1,8 @@
 import datetime
-from itertools import zip_longest
+try:
+    from itertools import zip_longest  # Python 3
+except ImportError:
+    from itertools import izip_longest as zip_longest  # Python 2
 
 import lxml.etree as ET
 import pytest
