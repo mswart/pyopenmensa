@@ -22,8 +22,15 @@ Documentation is hosted by `ReadTheDocs <https://readthedocs.org>`__: for the `F
 The documentation is created with `Spinx <http://sphinx-doc.org/>`__ and the documentation source code can be found in the doc/ directory.
 
 
-tldr: Documentation
--------------------
+Quickstart
+----------
+
+You can create a OpenMensa feed using the ``feed`` or the ``model`` approach.
+``feed`` is the original, opinionated library that automates typical tasks.
+``model`` gives you more control by allowing you to build the feed from components and use builders specifically when you need them.
+
+Installation
+~~~~~~~~~~~~
 
 1. You need `Python <http://www.python.org/>`__ 2.6, 2.7 or **>=3.2**.
 2. Install pyopenmensa:
@@ -39,6 +46,9 @@ tldr: Documentation
       .. code:: bash
 
          git clone git://github.com/mswart/pyopenmensa``
+
+Feed
+~~~~
 
 3. Create Feed builder:
 
@@ -59,7 +69,7 @@ tldr: Documentation
       )
       canteen.setDayClosed('5.3.2013')
 
-5. Receive XML Feed:
+5. Generate XML feed:
 
    .. code:: python
 
@@ -88,6 +98,35 @@ tldr: Documentation
           </day>
         </canteen>
       </openmensa>
+
+Model
+~~~~~
+
+3. Build the model:
+
+    .. code:: python
+
+        from pyopenmensa.model import Meal, Prices, Notes, Category, Day, Canteen
+
+        meal = Meal('Gulasch', prices=Prices(others=305, students=203), notes=Notes(['Mit Süßstoff', 'Schwein']))
+        category = Category('Hauptgericht', meals=[meal])
+        day = Day(datetime.date(2013, 03, 04), categories=[category])
+        canteen = Canteen(days=[day])
+
+4. Generate XML feed:
+
+    .. code:: python
+
+        print(canteen.to_string())
+
+Alternatively, you can use one of the builders in ``pyopenmensa.model.builders`` to handle a common task for you.
+
+-  ``PricesBuilder`` is used when meals share supplements for certain roles.
+Instead of manually calculating the prices, ``PricesBuilder`` allows you to set the supplements once and the generate the prices for the different roles based on a default price.
+
+-  ``NotesBuilder`` maps note keys to the full notes using a legend dict.
+
+-  ``PricesCategoryBuilder`` will let you specify the price for an entire category and replace all the contained meals' prices with it.
 
 
 Contributing
