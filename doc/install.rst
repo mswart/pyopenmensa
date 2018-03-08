@@ -9,7 +9,7 @@ __ http://git-scm.com/
 Requirements
 ------------
 
-* **Python >= 3.2**, Python 2.7 is currently also supported, but Python 3 is recommended.
+* **Python >= 3.4**, Python 2.7 is currently also supported, but Python 3 is recommended.
 
 No additional packages or libraries are needed.
 
