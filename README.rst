@@ -109,7 +109,7 @@ LGPL License
 Copyright (c) 2012-2015 Malte Swart. LGPL license, see LICENSE for more
 details.
 
-.. |Build Status| image:: https://travis-ci.org/mswart/pyopenmensa.png?branch=master
+.. |Build Status| image:: https://travis-ci.org/mswart/pyopenmensa.svg?branch=master
     :target: https://travis-ci.org/mswart/pyopenmensa
     :alt: Build Status
 
