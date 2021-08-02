@@ -41,7 +41,7 @@ Also these ways:
 
 - a dictionary with a role to prices mapping::
 
-    buildPrices({'student': '3.64 €', 'employee': 3.84, 'others': 414})
+    buildPrices({'student': '3.64 €', 'employee': 3.84, 'other': 414})
 
 - a iterator about prices and a iterator about roles::
 
@@ -49,12 +49,12 @@ Also these ways:
 
 - base prices and additional costs for other roles::
 
-    buildPrices(3.64, default='student', addtional={'employee': '0.20€', 'others': 50})
+    buildPrices(3.64, default='student', addtional={'employee': '0.20€', 'other': 50})
 
 
 will create::
 
-    {'student': 364, 'employee': 384, 'others': 414}
+    {'student': 364, 'employee': 384, 'other': 414}
 
 The fifth and sixth parameter of :meth:`.LazyBuilder.addMeal` are passed to :func:`.buildPrices` - so there is normally no need to call it directly.
 
