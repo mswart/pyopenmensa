@@ -29,7 +29,7 @@ class ModelMeta(type):
 class Entity(object, metaclass=ModelMeta):
 	default_api_base = None
 	default_opener = build_opener()
-	charset_pattern = re.compile('.*charset=(?P<encoding>[\w-]+)')
+	charset_pattern = re.compile(r'.*charset=(?P<encoding>[\w-]+)')
 
 	def __init__(self, api_base=None, opener=None):
 		self.api_base = api_base or self.default_api_base
