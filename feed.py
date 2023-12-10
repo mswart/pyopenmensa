@@ -13,11 +13,11 @@ except ImportError:  # support python 2.6
 # Helpers to extract dates from strings
 # -------------------------------------
 
-date_format = re.compile(".*?(?P<datestr>(" +
-                         "\d{2}(\d{2})?-[01]?\d-[0-3]?\d|" +
-                         "[0-3]?\d\.[01]?\d\.\d{2}(\d{2})?|" +
-                         "(?P<day>[0-3]?\d)\.? ?(?P<month>\S+) ?" +
-                         "(?P<year>\d{2}(\d{2})?))).*",
+date_format = re.compile(r".*?(?P<datestr>(" +
+                         r"\d{2}(\d{2})?-[01]?\d-[0-3]?\d|" +
+                         r"[0-3]?\d\.[01]?\d\.\d{2}(\d{2})?|" +
+                         r"(?P<day>[0-3]?\d)\.? ?(?P<month>\S+) ?" +
+                         r"(?P<year>\d{2}(\d{2})?))).*",
                          re.UNICODE)
 month_names = {
     'januar': '01',
@@ -184,11 +184,11 @@ def buildPrices(data, roles=None, regex=default_price_regex,
 # -------------------------------------
 
 #: Default regex str for :func:`buildLegend`
-default_legend_regex = '(?P<name>(\d|[a-z])+)\)\s*' + \
-                       '(?P<value>\w+((\s+\w+)*[^0-9)]))'
+default_legend_regex = r'(?P<name>(\d|[a-z])+)\)\s*' + \
+                       r'(?P<value>\w+((\s+\w+)*[^0-9)]))'
 #: Default compiled regex for :func:`extractNotes`
-default_extra_regex = re.compile('\((?P<extra>[0-9a-zA-Z]{1,2}'
-                                 '(?:,[0-9a-zA-Z]{1,2})*)\)', re.UNICODE)
+default_extra_regex = re.compile(r'\((?P<extra>[0-9a-zA-Z]{1,2}'
+                                 r'(?:,[0-9a-zA-Z]{1,2})*)\)', re.UNICODE)
 
 
 def buildLegend(legend=None, text=None, regex=None, key=lambda v: v):
